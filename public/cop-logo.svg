@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="globeGrad" cx="50%" cy="50%" r="50%" fx="35%" fy="35%">
+      <stop offset="0%" stop-color="#4a90e2" />
+      <stop offset="60%" stop-color="#133e87" />
+      <stop offset="100%" stop-color="#0b2545" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2A3" />
+      <stop offset="30%" stop-color="#F59E0B" />
+      <stop offset="70%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#92400E" />
+    </linearGradient>
+
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#B91C1C" />
+      <stop offset="40%" stop-color="#EF4444" />
+      <stop offset="75%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FEF08A" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <path id="textCircle" d="M 70, 250 a 180,180 0 1,1 360,0 a 180,180 0 1,1 -360,0" />
+    <path id="topTextArc" d="M 65, 250 A 185,185 0 0,1 435,250" />
+    <path id="bottomTextArc" d="M 435, 250 A 185,185 0 0,1 65,250" />
+  </defs>
+
+  <!-- Outer Ring Base -->
+  <circle cx="250" cy="250" r="242" fill="#0B2545" stroke="url(#goldGrad)" stroke-width="8" />
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4,4" />
+
+  <!-- Outer Ring Navy Band -->
+  <circle cx="250" cy="250" r="226" fill="#07182D" stroke="url(#goldGrad)" stroke-width="4" />
+
+  <!-- Inner Globe Border -->
+  <circle cx="250" cy="250" r="156" fill="url(#globeGrad)" stroke="url(#goldGrad)" stroke-width="6" />
+
+  <!-- Globe Latitudes / Longitudes -->
+  <!-- Equator & parallels -->
+  <ellipse cx="250" cy="250" rx="154" ry="0.5" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" />
+  <ellipse cx="250" cy="210" rx="142" ry="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+  <ellipse cx="250" cy="290" rx="142" ry="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+  <ellipse cx="250" cy="170" rx="115" ry="30" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1" />
+  <ellipse cx="250" cy="330" rx="115" ry="30" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1" />
+
+  <!-- Meridians -->
+  <line x1="250" y1="96" x2="250" y2="404" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" />
+  <ellipse cx="250" cy="250" rx="55" ry="154" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+  <ellipse cx="250" cy="250" rx="105" ry="154" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+
+  <!-- Simplified Stylized World Continents in gold/greenish faint -->
+  <path d="M 230 140 Q 245 130 265 145 Q 280 160 270 180 Q 250 170 240 185 Q 225 170 230 140 Z" fill="#D97706" opacity="0.35" />
+  <!-- Africa -->
+  <path d="M 235 210 Q 275 205 285 230 Q 275 260 260 280 Q 248 300 245 320 Q 235 300 230 270 Q 225 240 235 210 Z" fill="#D97706" opacity="0.45" />
+  <!-- Americas -->
+  <path d="M 140 150 Q 170 160 165 190 Q 150 200 135 180 Z" fill="#D97706" opacity="0.35" />
+  <path d="M 160 230 Q 185 245 180 280 Q 165 310 150 280 Z" fill="#D97706" opacity="0.35" />
+  <!-- Asia / Australia -->
+  <path d="M 290 140 Q 345 150 350 190 Q 320 200 300 180 Z" fill="#D97706" opacity="0.35" />
+  <path d="M 330 270 Q 360 275 355 300 Q 330 305 330 270 Z" fill="#D97706" opacity="0.35" />
+
+  <!-- Ring of Fire surrounding Holy Spirit Dove -->
+  <circle cx="250" cy="225" r="95" fill="none" stroke="url(#fireGrad)" stroke-width="9" stroke-linecap="round" filter="url(#glow)" />
+  <circle cx="250" cy="225" r="95" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="8,6" />
+
+  <!-- Descending Dove (Holy Spirit) -->
+  <!-- Dove Wings Left & Right -->
+  <g transform="translate(0, -10)">
+    <!-- Wings Shadow/Base -->
+    <path d="M 250, 160 C 220, 175 160, 200 170, 245 C 190, 250 220, 230 245, 215 C 248, 210 252, 210 255, 215 C 280, 230 310, 250 330, 245 C 340, 200 280, 175 250, 160 Z" fill="#E2E8F0" />
+    
+    <!-- Wings Detailed Feathers Left -->
+    <path d="M 250, 162 C 225, 178 175, 205 180, 235 C 195, 240 215, 225 242, 205 Z" fill="#FFFFFF" />
+    <path d="M 240, 185 C 215, 202 185, 220 190, 245 C 205, 248 225, 230 245, 212 Z" fill="#FFFFFF" />
+    <path d="M 235, 200 C 210, 218 198, 235 205, 252 C 218, 250 232, 235 246, 218 Z" fill="#F8FAFC" />
+
+    <!-- Wings Detailed Feathers Right -->
+    <path d="M 250, 162 C 275, 178 325, 205 320, 235 C 305, 240 285, 225 258, 205 Z" fill="#FFFFFF" />
+    <path d="M 260, 185 C 285, 202 315, 220 310, 245 C 295, 248 275, 230 255, 212 Z" fill="#FFFFFF" />
+    <path d="M 265, 200 C 290, 218 302, 235 295, 252 C 282, 250 268, 235 254, 218 Z" fill="#F8FAFC" />
+
+    <!-- Dove Body & Head (Descending Downward) -->
+    <path d="M 250, 272 C 242, 255 240, 225 244, 195 C 246, 178 254, 178 256, 195 C 260, 225 258, 255 250, 272 Z" fill="#FFFFFF" stroke="#F1F5F9" stroke-width="1" />
+    <!-- Dove Head -->
+    <circle cx="250" cy="275" r="9" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+    <!-- Dove Beak (Pointing Down) -->
+    <polygon points="247,282 253,282 250,292" fill="#F59E0B" />
+    <!-- Dove Eye -->
+    <circle cx="247" cy="274" r="1.5" fill="#0B2545" />
+    <circle cx="253" cy="274" r="1.5" fill="#0B2545" />
+
+    <!-- Dove Tail Feathers (Spread Upwards) -->
+    <path d="M 250, 165 C 242, 140 235, 120 240, 110 C 248, 125 250, 145 250, 165 Z" fill="#FFFFFF" />
+    <path d="M 250, 165 C 258, 140 265, 120 260, 110 C 252, 125 250, 145 250, 165 Z" fill="#FFFFFF" />
+    <path d="M 250, 165 C 247, 135 250, 112 250, 105 C 250, 112 253, 135 250, 165 Z" fill="#FFFFFF" />
+    
+    <!-- Dove Gold Radiant Halo -->
+    <ellipse cx="250" cy="200" rx="32" ry="12" fill="none" stroke="#F59E0B" stroke-width="1.5" opacity="0.75" />
+  </g>
+
+  <!-- Open Holy Bible at Bottom Center -->
+  <g transform="translate(250, 345) scale(0.9)">
+    <!-- Bible Base / Pages Shadow -->
+    <path d="M -75, 15 Q -40, 5 0, 18 Q 40, 5 75, 15 L 70, 42 Q 35, 32 0, 45 Q -35, 32 -70, 42 Z" fill="#78350F" />
+    <!-- Pages Left -->
+    <path d="M -72, 12 Q -38, 2 0, 15 L 0, 38 Q -38, 25 -68, 36 Z" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5" />
+    <!-- Pages Right -->
+    <path d="M 72, 12 Q 38, 2 0, 15 L 0, 38 Q 38, 25 68, 36 Z" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5" />
+    <!-- Bible Bookmark Ribbon in Red -->
+    <path d="M 0, 15 Q 10, 35 15, 52 L 5, 48 L 0, 54 L -2, 35 Z" fill="#DC2626" />
+    <!-- Mini Gold Cross on Bible -->
+    <rect x="-2" y="20" width="4" height="12" fill="#D97706" />
+    <rect x="-6" y="23" width="12" height="3" fill="#D97706" />
+  </g>
+
+  <!-- Typography Arched around the Ring -->
+  <!-- Top Text: THE CHURCH OF PENTECOST -->
+  <text font-family="'Plus Jakarta Sans', 'Arial Black', sans-serif" font-weight="800" font-size="25.5" fill="#FFFFFF" letter-spacing="3.5">
+    <textPath href="#topTextArc" startOffset="50%" text-anchor="middle">
+      THE CHURCH OF PENTECOST
+    </textPath>
+  </text>
+
+  <!-- Bottom Stars & Motto Accent -->
+  <text font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="700" font-size="14.5" fill="#FBBF24" letter-spacing="4">
+    <textPath href="#bottomTextArc" startOffset="50%" text-anchor="middle">
+      ★  HOLINESS  •  FELLOWSHIP  •  POWER  ★
+    </textPath>
+  </text>
+
+  <!-- Decorative Gold Stars at 9 o'clock and 3 o'clock -->
+  <g transform="translate(56, 250)">
+    <polygon points="0,-7 2,-2 7,-2 3,1 5,6 0,3 -5,6 -3,1 -7,-2 -2,-2" fill="#F59E0B" />
+  </g>
+  <g transform="translate(444, 250)">
+    <polygon points="0,-7 2,-2 7,-2 3,1 5,6 0,3 -5,6 -3,1 -7,-2 -2,-2" fill="#F59E0B" />
+  </g>
+</svg>
