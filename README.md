@@ -1,78 +1,71 @@
 # COP Connect — The Church of Pentecost
 
-**COP Connect** is an internal, verified-membership web and mobile platform for **The Church of Pentecost (COP)** that reflects its organizational hierarchy (**National Super Admin → Areas (Area Heads) → Districts (Pastors) → Local Assemblies**) to enable seamless collaboration, verification trust chains, project monitoring, and nationwide/international inspiration.
+A web & mobile collaboration and project monitoring network for **The Church of Pentecost (COP)** worldwide. Designed to connect **Areas &rarr; Districts &rarr; Local Assemblies** to share real-time updates on church building construction, evangelism outreaches, mission houses, and community initiatives.
 
 ---
 
-## 🏛️ Church Organizational Hierarchy & Trust Chain
+## 🏛️ Organizational Architecture & Verification Hierarchy
+
+COP Connect implements a **2-Tier Trust Chain Verification System**:
 
 ```
-[National Super Admin] (General Head Office IT & Administration)
-       │
-       │  Verifies & Approves
-       ▼
-[Area Head Account] (Apostle / Area Pastor) ── Manages Area & 5 to 30 Districts
-       │
-       │  Approves
-       ▼
-[Pastor / District Account]
-       - Registers, selects their Area from searchable list
-       - Enters / requests District
-       - Status = "Pending" until Area Head approves
-       - Once approved → Full posting & management rights
+[1. National Super Admin] (General Head Office IT & Administration)
+         │
+         │  (Tier 1 Verification: Checks & Verifies Area Heads)
+         ▼
+[2. Area Head Account] (Apostle / Area Pastor) ── Declares their Area on sign-up
+         │
+         │  (Tier 2 Confirmation: Area Head confirms Pastors in their jurisdiction)
+         ▼
+[3. District Pastor Account] (District Minister)
+         │
+         ▼  (Once verified by Area Head)
+[4. District Project Uploads & National Feed Publishing]
 ```
 
 ---
 
-## 🚀 Key Features
+## 🚀 Features
 
-1. **Hierarchy Verification Workflows:**
-   - **Super Admin Command Center:** Global KPIs, Area Head Verification Queue, Master Area/District Manager, System Audit Trail.
-   - **Area Head Dashboard:** Summary across all constituent Districts, Pending Pastor Approval Queue with 1-click Approve/Reject, and Area-wide updates.
-   - **Pastor Dashboard:** District-specific summary, My Projects portfolio, Upload New Project, and Milestone tracking.
-   - **Pending Approval Screen:** Real-time feedback for applicants showing their exact position in the hierarchy trust chain.
-2. **National & Global Activity Feed:**
-   - Real-time project cards with stage-by-stage construction photos, funding progress bars, and Area/District badges.
-   - Searchable and filterable by Area, Category (*Church Building, Outreach/Evangelism, Community Project, Mission House, Conference/Event*), and Status (*Planned, Ongoing, Completed*).
-3. **Project Details & Interactive Encouragements:**
-   - High-resolution photo gallery viewer.
-   - Full scope narratives and milestone checklist with interactive status updates.
-   - Encouragement reactions ("Amen! 🙏", "Glory to God! ✨", "Inspiring 👏", "Keep Shining 🌟") with celebratory micro-animations and comment threads.
-4. **Client-Side Image Optimization:**
-   - Automatically resizes and compresses camera uploads on the client side before submission to keep the feed ultra-fast across mobile and low-bandwidth regions.
-5. **Interactive Persona Switcher:**
-   - Built-in floating switcher to seamlessly test all roles (*Super Admin, Area Head, Approved Pastor, Pending Applicant, or Live Signup*).
-6. **Multi-Language Support:**
-   - English & French toggle for COP's international presence across West Africa, Europe, and the Americas.
+- **Executive "Share What God is Doing" Composer**: Quick project creation with photo uploads from mobile camera / PC.
+- **National Leadership Activity Feed**: Multi-filterable by Area, District, Category, and Status.
+- **2-Tier Verified Registration**:
+  - Area Heads register and declare their Area &rarr; Super Admin verifies with 1 click.
+  - Pastors register and select their Area &rarr; Area Head verifies their appointment.
+- **Full Project Management**: Edit titles, descriptions, stage notes, and photo galleries; post status progression (*Planned &rarr; Ongoing &rarr; Completed*).
+- **Interactive Encouragements & Discussions**: Ministers can send praises, likes, and comments on sister district projects.
+- **Brand Compliance**: Built with official Church of Pentecost colors (*Deep Blue, Pentecost Gold, Red Fire, White*) and official vector emblem.
 
 ---
 
-## 🎨 Official Brand Identity Compliance
+## 💻 Tech Stack
 
-- **Ultramarine Deep Blue** (`#0B2545` / `#133E87`): Primary (peace of heaven, law, order, compassion).
-- **Pentecost Gold / Yellow** (`#F59E0B` / `#D97706`): Secondary / Accent (glorious golden church).
-- **Flame Red** (`#DC2626`): Accent (blood of Christ & Holy Ghost fire).
-- **White** (`#FFFFFF`): Backgrounds (righteousness).
-- **Official Emblem:** Fixed, unaltered high-resolution vector emblem prominently positioned on headers and login screens.
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Icons**: Lucide React
+- **Client-Side Optimization**: HTML5 Canvas Image Compression
+- **State Management**: Reactive React Context + LocalStorage persistence
 
 ---
 
-## 💻 Tech Stack & Getting Started
-
-- **Frontend:** React (TypeScript), Tailwind CSS, Lucide React, Canvas Confetti, Date-fns.
-- **Data & Auth Layer:** Modular architecture supporting Firebase (Auth, Firestore, Storage) with a reactive zero-config client database fallback.
-
-### Running Locally
+## 🛠️ Getting Started Locally
 
 ```bash
+# Clone the repository
+git clone https://github.com/nkansahisaac436-dotcom/cop_connect.git
+
+# Navigate to project directory
+cd cop_connect
+
 # Install dependencies
 npm install
 
-# Start development server
+# Start local development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+---
+
+## 📄 License
+Internal proprietary software for The Church of Pentecost.
