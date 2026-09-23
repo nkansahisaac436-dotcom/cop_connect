@@ -37,15 +37,22 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
   onOpenUploadModal,
   onNavigate,
 }) => {
-  const { currentUser, users, approveUser, rejectUser } = useAuth();
+  const { currentUser, users, approveUser, rejectUser, requestMoreInfo } = useAuth();
   const { projects, areas, districts, auditLogs, recordApprovalLog } = useData();
 
   const [activeTab, setActiveTab] = useState<'verifications' | 'areas' | 'audit_logs'>('verifications');
   const [searchArea, setSearchArea] = useState('');
+  const [auditFilter, setAuditFilter] = useState<'ALL' | 'APPROVALS' | 'SECURITY' | 'PROJECTS'>('ALL');
+
+  // Modals
+  const [rejectionModalApplicant, setRejectionModalApplicant] = useState<User | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [infoModalApplicant, setInfoModalApplicant] = useState<User | null>(null);
+  const [inquiryMessage, setInquiryMessage] = useState('');
 
   // Pending Area Heads awaiting Super Admin verification
   const pendingAreaHeads = users.filter(
-    (u) => u.role === 'area_head' && u.status === 'pending'
+    (u) => u.role === 'area_head' && (u.status === 'pending' || u.status === 'needs_info')
   );
 
   const totalRaised = projects.reduce((acc, p) => acc + (p.raisedBudget || 0), 0);
@@ -69,16 +76,29 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
     });
   };
 
-  const handleRejectAreaHead = (applicant: User) => {
-    if (!currentUser) return;
-    const reason = prompt('Enter rejection reason:') || 'Credentials unverified by Head Office';
-    rejectUser(applicant.id, reason);
+  const handleConfirmReject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rejectionModalApplicant || !currentUser) return;
+    
+    rejectUser(rejectionModalApplicant.id, rejectionReason || 'Credentials unverified by Head Office', currentUser);
     recordApprovalLog(
       'AREA_HEAD_REJECTED',
       currentUser,
-      applicant,
-      `Super Admin rejected application: ${reason}`
+      rejectionModalApplicant,
+      `Super Admin rejected application: ${rejectionReason || 'Credentials unverified'}`
     );
+
+    setRejectionModalApplicant(null);
+    setRejectionReason('');
+  };
+
+  const handleConfirmRequestInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!infoModalApplicant || !currentUser) return;
+
+    requestMoreInfo(infoModalApplicant.id, inquiryMessage || 'Please clarify your executive appointment letter with General Headquarters.', currentUser);
+    setInfoModalApplicant(null);
+    setInquiryMessage('');
   };
 
   const filteredAreas = areas.filter(
@@ -87,6 +107,19 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
       a.region.toLowerCase().includes(searchArea.toLowerCase()) ||
       (a.areaHeadName && a.areaHeadName.toLowerCase().includes(searchArea.toLowerCase()))
   );
+
+  const filteredAuditLogs = auditLogs.filter((log) => {
+    if (auditFilter === 'APPROVALS') {
+      return log.action.includes('APPROVED') || log.action.includes('REJECTED') || log.action.includes('INFO');
+    }
+    if (auditFilter === 'SECURITY') {
+      return log.action.includes('LOGIN') || log.action.includes('LOCK') || log.action.includes('FACTOR');
+    }
+    if (auditFilter === 'PROJECTS') {
+      return log.action.includes('PROJECT') || log.action.includes('AREA_CREATED');
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in">
@@ -246,20 +279,31 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 to-amber-500" />
 
                   <div className="flex items-start gap-3.5">
-                    <img
-                      src={
-                        applicant.profilePhoto ||
-                        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80'
-                      }
-                      alt={applicant.fullName}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-red-400 flex-shrink-0"
-                    />
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={
+                          applicant.profilePhoto ||
+                          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80'
+                        }
+                        alt={applicant.fullName}
+                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-red-400 shadow-md"
+                      />
+                      <span className="absolute -bottom-1.5 -right-1 px-1.5 py-0.5 rounded-md bg-cop-blue-900 text-[9px] font-bold text-cop-gold-300 border border-cop-gold-400/40">
+                        Face ID
+                      </span>
+                    </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
-                          Pending Verification
-                        </span>
+                      <div className="flex items-center justify-between gap-1">
+                        {applicant.status === 'needs_info' ? (
+                          <span className="text-[10px] font-bold text-cop-blue-800 bg-cop-blue-100 px-2 py-0.5 rounded-full">
+                            Clarification Inquired
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
+                            Pending Super Admin Verification
+                          </span>
+                        )}
                         <span className="text-[10px] text-slate-400">
                           {applicant.createdAt ? new Date(applicant.createdAt).toLocaleDateString() : ''}
                         </span>
@@ -270,11 +314,25 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
                       </h3>
 
                       <div className="text-xs font-semibold text-cop-blue-900 flex items-center gap-1 mt-0.5">
-                        <Globe2 className="w-3.5 h-3.5 text-cop-gold-600" />
+                        <Globe2 className="w-3.5 h-3.5 text-cop-gold-600 flex-shrink-0" />
                         <span>Area Declared: <strong>{applicant.areaName}</strong></span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Applicant Notes */}
+                  {applicant.notes && (
+                    <div className="bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/80 text-[11px] text-amber-950">
+                      <span className="font-bold text-amber-900">Applicant Note:</span> "{applicant.notes}"
+                    </div>
+                  )}
+
+                  {/* Inquired note */}
+                  {applicant.infoRequestMessage && (
+                    <div className="bg-cop-blue-50 p-2.5 rounded-xl border border-cop-blue-200 text-[11px] text-cop-blue-950">
+                      <span className="font-bold text-cop-blue-900">Head Office Inquiry:</span> "{applicant.infoRequestMessage}"
+                    </div>
+                  )}
 
                   {/* Contact info */}
                   <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-2 gap-2 text-xs border border-slate-100">
@@ -289,22 +347,36 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                    <button
-                      onClick={() => handleApproveAreaHead(applicant)}
-                      className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-colors"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Verify Apostle & Activate {applicant.areaName}</span>
-                    </button>
+                  <div className="pt-1">
+                    <div className="text-[11px] text-slate-500 mb-2">
+                      National Executive Action for <strong>{applicant.areaName}</strong>:
+                    </div>
 
-                    <button
-                      onClick={() => handleRejectAreaHead(applicant)}
-                      className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center gap-1 border border-slate-200 transition-colors"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      <span>Decline</span>
-                    </button>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => handleApproveAreaHead(applicant)}
+                        className="col-span-3 sm:col-span-1 py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow transition-colors"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Verify & Activate</span>
+                      </button>
+
+                      <button
+                        onClick={() => setInfoModalApplicant(applicant)}
+                        className="py-2.5 px-2 rounded-xl bg-cop-blue-50 hover:bg-cop-blue-100 text-cop-blue-800 font-bold text-xs flex items-center justify-center gap-1 border border-cop-blue-200 transition-colors"
+                      >
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>Request Info</span>
+                      </button>
+
+                      <button
+                        onClick={() => setRejectionModalApplicant(applicant)}
+                        className="py-2.5 px-2 rounded-xl bg-slate-100 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center gap-1 border border-slate-200 transition-colors"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Decline</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -391,52 +463,198 @@ export const SuperAdminDashboardPage: React.FC<SuperAdminDashboardPageProps> = (
         </div>
       )}
 
-      {/* TAB 3: SYSTEM AUDIT TRAIL */}
+      {/* TAB 3: SYSTEM AUDIT TRAIL / ACCESS LOG */}
       {activeTab === 'audit_logs' && (
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm space-y-0">
+          <div className="p-5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-heading font-bold text-base text-slate-900">
-                System Accountability & Verification Audit Trail
+                National Access & Verification Audit Trail
               </h3>
               <p className="text-xs text-slate-500">
-                Log of all leadership approvals, registrations, and project uploads.
+                Read-only global oversight of all access requests, independent approvals by Area Heads, security logins, and project activities.
               </p>
             </div>
-            <span className="text-xs font-bold text-cop-blue-700 bg-cop-blue-50 px-3 py-1 rounded-full border border-cop-blue-200">
-              {auditLogs.length} Events Logged
+            <span className="text-xs font-bold text-cop-blue-700 bg-cop-blue-50 px-3 py-1 rounded-full border border-cop-blue-200 w-fit">
+              {filteredAuditLogs.length} Events Filtered
             </span>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            {auditLogs.map((log) => (
-              <div key={log.id} className="p-4 sm:p-5 flex items-start gap-4 text-xs">
-                <div className="w-8 h-8 rounded-xl bg-cop-blue-50 text-cop-blue-800 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <FileText className="w-4 h-4" />
-                </div>
+          {/* Filter Bar */}
+          <div className="p-3 bg-slate-100/70 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto text-xs font-bold">
+            <button
+              onClick={() => setAuditFilter('ALL')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                auditFilter === 'ALL' ? 'bg-cop-blue-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All Events ({auditLogs.length})
+            </button>
+            <button
+              onClick={() => setAuditFilter('APPROVALS')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                auditFilter === 'APPROVALS' ? 'bg-cop-blue-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Approvals & Verifications
+            </button>
+            <button
+              onClick={() => setAuditFilter('SECURITY')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                auditFilter === 'SECURITY' ? 'bg-cop-blue-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Security & 2FA
+            </button>
+            <button
+              onClick={() => setAuditFilter('PROJECTS')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                auditFilter === 'PROJECTS' ? 'bg-cop-blue-900 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Projects & Areas
+            </button>
+          </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-900 text-sm">
-                      {log.action.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-[11px] text-slate-400">
-                      {formatDateTime(log.timestamp)}
-                    </span>
-                  </div>
-
-                  <div className="text-slate-600 mt-1">
-                    <span className="font-semibold text-cop-blue-900">{log.actorName}</span>{' '}
-                    ({log.actorRole.replace('_', ' ')}) &rarr;{' '}
-                    <span className="font-semibold text-slate-800">{log.targetName}</span>
-                  </div>
-
-                  <p className="text-slate-500 mt-1 text-[11px] bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    {log.details}
-                  </p>
-                </div>
+          <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+            {filteredAuditLogs.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-500">
+                No events found matching the selected filter.
               </div>
-            ))}
+            ) : (
+              filteredAuditLogs.map((log) => (
+                <div key={log.id} className="p-4 sm:p-5 flex items-start gap-4 text-xs hover:bg-slate-50/70 transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-cop-blue-50 text-cop-blue-800 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <FileText className="w-4 h-4" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-slate-900 text-sm">
+                        {log.action.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-[11px] text-slate-400 whitespace-nowrap">
+                        {formatDateTime(log.timestamp)}
+                      </span>
+                    </div>
+
+                    <div className="text-slate-600 mt-1">
+                      <span className="font-semibold text-cop-blue-900">{log.actorName}</span>{' '}
+                      ({log.actorRole.replace('_', ' ')}) &rarr;{' '}
+                      <span className="font-semibold text-slate-800">{log.targetName}</span>
+                    </div>
+
+                    <p className="text-slate-600 mt-1.5 text-[11px] bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                      {log.details}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* REJECTION MODAL */}
+      {rejectionModalApplicant && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading font-bold text-base text-red-600 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                Decline Area Head Application
+              </h3>
+              <button
+                onClick={() => setRejectionModalApplicant(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Please enter the official reason for declining the registration of{' '}
+              <strong>{rejectionModalApplicant.fullName}</strong> for{' '}
+              <strong>{rejectionModalApplicant.areaName}</strong>:
+            </p>
+
+            <form onSubmit={handleConfirmReject} className="space-y-3">
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={3}
+                placeholder="e.g. Applicant credentials unverified with General Secretariat records."
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-red-500"
+                required
+              />
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRejectionModalApplicant(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow"
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REQUEST MORE INFO MODAL */}
+      {infoModalApplicant && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading font-bold text-base text-cop-blue-900 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-cop-blue-700" />
+                Request Head Office Clarification
+              </h3>
+              <button
+                onClick={() => setInfoModalApplicant(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Send a clarification message to <strong>{infoModalApplicant.fullName}</strong> regarding <strong>{infoModalApplicant.areaName}</strong>:
+            </p>
+
+            <form onSubmit={handleConfirmRequestInfo} className="space-y-3">
+              <textarea
+                value={inquiryMessage}
+                onChange={(e) => setInquiryMessage(e.target.value)}
+                rows={3}
+                placeholder="e.g. Please confirm your transfer date or attach your Council Appointment Minute."
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                required
+              />
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setInfoModalApplicant(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-cop-blue-800 hover:bg-cop-blue-900 text-white font-bold text-xs shadow"
+                >
+                  Send Inquiry Message
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

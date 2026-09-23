@@ -1,6 +1,6 @@
 export type UserRole = 'super_admin' | 'area_head' | 'pastor';
 
-export type UserStatus = 'pending' | 'approved' | 'rejected';
+export type UserStatus = 'pending' | 'approved' | 'rejected' | 'needs_info';
 
 export type ProjectCategory = 
   | 'Church Building'
@@ -17,7 +17,12 @@ export interface User {
   fullName: string;
   email: string;
   phone: string;
-  password?: string;
+  password?: string; // Plaintext fallback for mock/demo test accounts
+  passwordHash?: string; // Hashed password
+  salt?: string;
+  failedLoginAttempts?: number;
+  lockedUntil?: string; // ISO date string if account locked
+  twoFactorEnabled?: boolean;
   role: UserRole;
   status: UserStatus;
   titlePrefix?: string; // e.g. "Apostle", "Pastor", "Elder", "Rev."
@@ -26,10 +31,12 @@ export interface User {
   districtId?: string;
   districtName?: string;
   profilePhoto?: string;
+  photoVerificationUrl?: string; // Required clear face/ID photo
   approvedBy?: string; // User ID of Super Admin or Area Head
   approvedByName?: string;
   approvedAt?: string; // ISO date string
   rejectionReason?: string;
+  infoRequestMessage?: string; // Note from approver asking for clarification
   appointmentYear?: string;
   notes?: string;
   createdAt: string;
@@ -138,19 +145,27 @@ export interface AuditLog {
   actorName: string;
   actorRole: UserRole;
   action: 
-    | 'USER_SIGNUP'
-    | 'AREA_HEAD_SIGNUP'
-    | 'PASTOR_SIGNUP'
+    | 'ACCESS_REQUEST_SUBMITTED'
     | 'AREA_HEAD_APPROVED'
     | 'AREA_HEAD_REJECTED'
+    | 'AREA_HEAD_INFO_REQUESTED'
     | 'PASTOR_APPROVED'
     | 'PASTOR_REJECTED'
+    | 'PASTOR_INFO_REQUESTED'
+    | 'FAILED_LOGIN_ATTEMPT'
+    | 'ACCOUNT_LOCKED'
+    | 'TWO_FACTOR_VERIFIED'
+    | 'LOGIN_SUCCESSFUL'
+    | 'LOGOUT'
     | 'PROJECT_CREATED'
     | 'PROJECT_UPDATED'
     | 'PROJECT_STATUS_CHANGED'
     | 'AREA_CREATED';
   targetId: string;
   targetName: string;
+  targetRole?: UserRole;
+  targetAreaName?: string;
+  targetDistrictName?: string;
   details: string;
   timestamp: string;
 }

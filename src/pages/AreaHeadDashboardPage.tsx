@@ -38,13 +38,17 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
   onOpenUploadModal,
   onNavigate,
 }) => {
-  const { currentUser, users, approveUser, rejectUser } = useAuth();
+  const { currentUser, users, approveUser, rejectUser, requestMoreInfo } = useAuth();
   const { projects, areas, districts, recordApprovalLog } = useData();
 
   const [activeTab, setActiveTab] = useState<'approvals' | 'districts' | 'projects'>('approvals');
   const [districtSearch, setDistrictSearch] = useState('');
+  
+  // Modals
   const [rejectionModalUser, setRejectionModalUser] = useState<User | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [infoModalUser, setInfoModalUser] = useState<User | null>(null);
+  const [inquiryMessage, setInquiryMessage] = useState('');
 
   if (!currentUser) return null;
 
@@ -52,7 +56,7 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
   const pendingPastors = users.filter(
     (u) =>
       u.role === 'pastor' &&
-      u.status === 'pending' &&
+      (u.status === 'pending' || u.status === 'needs_info') &&
       (u.areaId === currentUser.areaId || u.areaName === currentUser.areaName)
   );
 
@@ -89,7 +93,7 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
     e.preventDefault();
     if (!rejectionModalUser) return;
 
-    rejectUser(rejectionModalUser.id, rejectionReason || 'Information not verified with Area Secretariat.');
+    rejectUser(rejectionModalUser.id, rejectionReason || 'Information not verified with Area Secretariat.', currentUser);
     recordApprovalLog(
       'PASTOR_REJECTED',
       currentUser,
@@ -99,6 +103,15 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
 
     setRejectionModalUser(null);
     setRejectionReason('');
+  };
+
+  const handleConfirmRequestInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!infoModalUser) return;
+
+    requestMoreInfo(infoModalUser.id, inquiryMessage || 'Please clarify your current pastoral appointment and stationing.', currentUser);
+    setInfoModalUser(null);
+    setInquiryMessage('');
   };
 
   const filteredDistricts = areaDistricts.filter(
@@ -263,20 +276,31 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 to-cop-gold-500" />
 
                   <div className="flex items-start gap-3.5">
-                    <img
-                      src={
-                        pastor.profilePhoto ||
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'
-                      }
-                      alt={pastor.fullName}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-amber-400 flex-shrink-0"
-                    />
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={
+                          pastor.profilePhoto ||
+                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'
+                        }
+                        alt={pastor.fullName}
+                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-amber-400 shadow-md"
+                      />
+                      <span className="absolute -bottom-1.5 -right-1 px-1.5 py-0.5 rounded-md bg-cop-blue-900 text-[9px] font-bold text-cop-gold-300 border border-cop-gold-400/40">
+                        Face ID
+                      </span>
+                    </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Pending Area Head Verification
-                        </span>
+                      <div className="flex items-center justify-between gap-1">
+                        {pastor.status === 'needs_info' ? (
+                          <span className="text-[10px] font-bold text-cop-blue-800 bg-cop-blue-100 px-2 py-0.5 rounded-full">
+                            Clarification Inquired
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                            Pending Area Verification
+                          </span>
+                        )}
                         <span className="text-[10px] text-slate-400">
                           {pastor.createdAt ? new Date(pastor.createdAt).toLocaleDateString() : ''}
                         </span>
@@ -287,11 +311,25 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
                       </h3>
 
                       <div className="text-xs font-semibold text-cop-blue-900 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3.5 h-3.5 text-cop-gold-600" />
+                        <MapPin className="w-3.5 h-3.5 text-cop-gold-600 flex-shrink-0" />
                         <span>Requested District: <strong>{pastor.districtName}</strong></span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Applicant Note if provided */}
+                  {pastor.notes && (
+                    <div className="bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/80 text-[11px] text-amber-950">
+                      <span className="font-bold text-amber-900">Applicant Note:</span> "{pastor.notes}"
+                    </div>
+                  )}
+
+                  {/* Previous Inquiry note if present */}
+                  {pastor.infoRequestMessage && (
+                    <div className="bg-cop-blue-50 p-2.5 rounded-xl border border-cop-blue-200 text-[11px] text-cop-blue-950">
+                      <span className="font-bold text-cop-blue-900">Pending Clarification:</span> "{pastor.infoRequestMessage}"
+                    </div>
+                  )}
 
                   {/* Contact & Registration info */}
                   <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-2 gap-2 text-xs border border-slate-100">
@@ -305,27 +343,34 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Confirmation & Actions */}
+                  {/* 3 Approver Actions */}
                   <div className="pt-1">
                     <div className="text-[11px] text-slate-500 mb-2">
-                      Confirm this minister is appointed to <strong>{pastor.districtName}</strong> in{' '}
-                      <strong>{currentUser.areaName}</strong>:
+                      Take ministerial action for <strong>{pastor.districtName}</strong>:
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         onClick={() => handleApprovePastor(pastor)}
-                        className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-colors"
+                        className="col-span-3 sm:col-span-1 py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow transition-colors"
                       >
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Confirm & Approve Pastor</span>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Approve</span>
+                      </button>
+
+                      <button
+                        onClick={() => setInfoModalUser(pastor)}
+                        className="py-2.5 px-2 rounded-xl bg-cop-blue-50 hover:bg-cop-blue-100 text-cop-blue-800 font-bold text-xs flex items-center justify-center gap-1 border border-cop-blue-200 transition-colors"
+                      >
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>Request Info</span>
                       </button>
 
                       <button
                         onClick={() => setRejectionModalUser(pastor)}
-                        className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center gap-1 border border-slate-200 transition-colors"
+                        className="py-2.5 px-2 rounded-xl bg-slate-100 hover:bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center gap-1 border border-slate-200 transition-colors"
                       >
-                        <XCircle className="w-4 h-4" />
+                        <XCircle className="w-3.5 h-3.5" />
                         <span>Decline</span>
                       </button>
                     </div>
@@ -474,6 +519,57 @@ export const AreaHeadDashboardPage: React.FC<AreaHeadDashboardPageProps> = ({
                   className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow"
                 >
                   Confirm Rejection
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REQUEST MORE INFO MODAL */}
+      {infoModalUser && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading font-bold text-base text-cop-blue-900 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-cop-blue-700" />
+                Request Clarification from Applicant
+              </h3>
+              <button
+                onClick={() => setInfoModalUser(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Send a clarification message to <strong>{infoModalUser.fullName}</strong> regarding their registration for <strong>{infoModalUser.districtName}</strong>:
+            </p>
+
+            <form onSubmit={handleConfirmRequestInfo} className="space-y-3">
+              <textarea
+                value={inquiryMessage}
+                onChange={(e) => setInquiryMessage(e.target.value)}
+                rows={3}
+                placeholder="e.g. Please clarify your year of appointment or provide your station transfer letter."
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                required
+              />
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setInfoModalUser(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-cop-blue-800 hover:bg-cop-blue-900 text-white font-bold text-xs shadow"
+                >
+                  Send Inquiry Message
                 </button>
               </div>
             </form>

@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider, useData } from './context/DataContext';
-import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { Navbar } from './components/common/Navbar';
-import { DemoRoleSwitcher } from './components/demo/DemoRoleSwitcher';
+import { LoginScreen } from './components/auth/LoginScreen';
+import { RequestAccessScreen } from './components/auth/RequestAccessScreen';
 import { NationalFeedPage } from './pages/NationalFeedPage';
 import { PastorDashboardPage } from './pages/PastorDashboardPage';
 import { AreaHeadDashboardPage } from './pages/AreaHeadDashboardPage';
 import { SuperAdminDashboardPage } from './pages/SuperAdminDashboardPage';
+import { AccessLogPage } from './pages/AccessLogPage';
 import { AreaProfilePage } from './pages/AreaProfilePage';
 import { DistrictProfilePage } from './pages/DistrictProfilePage';
 import { DirectoryPage } from './pages/DirectoryPage';
@@ -19,12 +21,15 @@ import { StatusUpdateModal } from './components/forms/StatusUpdateModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { Project } from './types';
 import { CopLogo } from './assets/CopLogo';
-import { Heart, Globe2, Shield, Sparkles } from 'lucide-react';
 
 function AppContent() {
-  const { currentUser } = useAuth();
+  const { currentUser, currentSession } = useAuth();
   const { projects } = useData();
 
+  // Authentication Gateway View: 'login' | 'request_access'
+  const [authView, setAuthView] = useState<'login' | 'request_access'>('login');
+
+  // Navigation state
   const [currentPage, setCurrentPage] = useState<string>('feed');
   const [selectedAreaId, setSelectedAreaId] = useState<string>('area_kaneshie');
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('dist_kaneshie_central');
@@ -36,6 +41,21 @@ function AppContent() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup_area' | 'signup_pastor'>('login');
+
+  // Automatically route to Role Dashboard on login
+  useEffect(() => {
+    if (currentUser && currentSession) {
+      if (currentUser.status === 'pending') {
+        setCurrentPage('pending');
+      } else if (currentUser.role === 'super_admin') {
+        setCurrentPage('admin');
+      } else if (currentUser.role === 'area_head') {
+        setCurrentPage('area_head');
+      } else if (currentUser.role === 'pastor') {
+        setCurrentPage('pastor');
+      }
+    }
+  }, [currentUser?.id, currentSession?.token]);
 
   const handleNavigate = (page: string, params?: Record<string, string>) => {
     if (params?.areaId) {
@@ -62,11 +82,28 @@ function AppContent() {
   };
 
   const handleProjectSelect = (project: Project) => {
-    // Look up fresh project in state
     const fresh = projects.find((p) => p.id === project.id) || project;
     setSelectedProject(fresh);
   };
 
+  // 1. GATEWAY: If no verified session exists, render the Login / Request Access screen
+  if (!currentSession || !currentUser) {
+    if (authView === 'request_access') {
+      return <RequestAccessScreen onBackToLogin={() => setAuthView('login')} />;
+    }
+    return (
+      <LoginScreen
+        onRequestAccess={() => setAuthView('request_access')}
+        onLoginSuccess={(role) => {
+          if (role === 'super_admin') setCurrentPage('admin');
+          else if (role === 'area_head') setCurrentPage('area_head');
+          else setCurrentPage('pastor');
+        }}
+      />
+    );
+  }
+
+  // 2. AUTHENTICATED APP: Session is active
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
       {/* Top Navbar */}
@@ -80,12 +117,12 @@ function AppContent() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* If user is in pending status and tries to access their dashboard, show pending view */}
-        {currentUser && currentUser.status === 'pending' && currentPage !== 'feed' && currentPage !== 'directory' && (
+        {currentUser.status === 'pending' && currentPage !== 'feed' && currentPage !== 'directory' && (
           <PendingApprovalView onNavigate={handleNavigate} />
         )}
 
         {/* Regular Pages */}
-        {(!currentUser || currentUser.status === 'approved' || currentPage === 'feed' || currentPage === 'directory') && (
+        {(currentUser.status === 'approved' || currentPage === 'feed' || currentPage === 'directory') && (
           <>
             {currentPage === 'feed' && (
               <NationalFeedPage
@@ -121,6 +158,10 @@ function AppContent() {
                 onOpenUploadModal={() => setShowUploadModal(true)}
                 onNavigate={handleNavigate}
               />
+            )}
+
+            {currentPage === 'access_log' && (
+              <AccessLogPage onBack={() => handleNavigate('admin')} />
             )}
 
             {currentPage === 'area_profile' && (
@@ -211,9 +252,6 @@ function AppContent() {
         onSuccess={(targetPage) => handleNavigate(targetPage)}
       />
 
-      {/* Floating Demo Role Switcher for instant testing */}
-      <DemoRoleSwitcher onOpenAuthModal={handleOpenAuthModal} />
-
       {/* Corporate Church Footer */}
       <footer className="bg-cop-blue-950 text-white border-t border-cop-gold-500/20 mt-16 pt-12 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,7 +301,7 @@ function AppContent() {
               All rights reserved.
             </div>
             <div className="flex items-center gap-4 text-cop-gold-400 font-semibold">
-              <span>Verified Leadership Portal</span>
+              <span>Verified Ministerial Network</span>
               <span>•</span>
               <span>Internal Church Intranet</span>
             </div>
