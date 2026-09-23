@@ -24,14 +24,12 @@ interface NationalFeedPageProps {
   onSelectProject: (project: Project) => void;
   onOpenStatusModal: (project: Project) => void;
   onOpenUploadModal: () => void;
-  onOpenAuthModal: (mode: 'login' | 'signup_area' | 'signup_pastor') => void;
 }
 
 export const NationalFeedPage: React.FC<NationalFeedPageProps> = ({
   onSelectProject,
   onOpenStatusModal,
   onOpenUploadModal,
-  onOpenAuthModal,
 }) => {
   const { projects, areas, clearAllProjects, restoreDefaultData } = useData();
   const { currentUser } = useAuth();
@@ -140,12 +138,9 @@ export const NationalFeedPage: React.FC<NationalFeedPageProps> = ({
                 <span>Upload Real Project Update</span>
               </button>
             ) : (
-              <button
-                onClick={() => onOpenAuthModal('signup_pastor')}
-                className="px-5 py-3 rounded-2xl bg-white text-cop-blue-900 hover:bg-slate-100 font-heading font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all"
-              >
-                <span>Register Your District</span>
-              </button>
+              <div className="px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-200 text-xs font-semibold text-center">
+                Account verification pending approval
+              </div>
             )}
 
             {/* Clean slate option for fresh real user data */}

@@ -16,49 +16,44 @@ export const CopLogo: React.FC<CopLogoProps> = ({
   variant = 'full',
 }) => {
   const sizeMap = {
-    xs: 'w-6 h-6',
-    sm: 'w-9 h-9',
-    md: 'w-12 h-12',
-    lg: 'w-16 h-16',
-    xl: 'w-24 h-24',
-    '2xl': 'w-32 h-32',
+    xs: 'w-7 h-7',
+    sm: 'w-10 h-10',
+    md: 'w-14 h-14',
+    lg: 'w-20 h-20',
+    xl: 'w-28 h-28',
+    '2xl': 'w-36 h-36',
   };
 
   const currentSizeClass = sizeMap[size] || sizeMap.md;
 
   return (
-    <div className={`inline-flex items-center gap-3 ${className}`}>
+    <div className={`inline-flex items-center gap-3.5 ${className}`}>
       {/* Official Church of Pentecost Emblem */}
-      <div className={`relative flex-shrink-0 ${currentSizeClass} drop-shadow-sm rounded-full bg-cop-blue-900 overflow-hidden ring-2 ring-cop-gold-500/80`}>
+      <div className={`relative flex-shrink-0 ${currentSizeClass} rounded-full bg-white overflow-hidden p-0.5 shadow-sm border border-slate-200`}>
         <img
-          src="/cop-logo.svg"
-          alt="The Church of Pentecost Official Logo"
-          className="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            // Fallback SVG representation if img fails
-            const target = e.target as HTMLElement;
-            target.style.display = 'none';
-          }}
+          src="/cop_emblem_circle.png"
+          alt="The Church of Pentecost Official Seal"
+          className="w-full h-full object-contain"
         />
       </div>
 
       {showText && (
-        <div className="flex flex-col leading-tight">
+        <div className="flex flex-col leading-tight text-left">
           <span
-            className={`font-heading font-extrabold tracking-tight text-base sm:text-lg uppercase ${
-              textColor === 'white' ? 'text-white' : 'text-cop-blue-900'
+            className={`font-serif font-black tracking-wider text-base sm:text-lg uppercase ${
+              textColor === 'white' ? 'text-white' : 'text-[#0B2545]'
             }`}
           >
             THE CHURCH OF PENTECOST
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-cop-gold-500"></span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#F1B51C]"></span>
             <span
-              className={`text-xs font-semibold tracking-wider uppercase ${
-                textColor === 'white' ? 'text-cop-gold-400' : 'text-cop-blue-700'
+              className={`text-[11px] font-bold tracking-widest uppercase ${
+                textColor === 'white' ? 'text-[#F1B51C]' : 'text-[#002D72]'
               }`}
             >
-              COP Connect &bull; Leadership Portal
+              COP Connect &bull; Official Network
             </span>
           </div>
         </div>

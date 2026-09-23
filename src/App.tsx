@@ -18,7 +18,6 @@ import { ProjectDetailModal } from './components/feed/ProjectDetailModal';
 import { UploadProjectModal } from './components/forms/UploadProjectModal';
 import { EditProjectModal } from './components/forms/EditProjectModal';
 import { StatusUpdateModal } from './components/forms/StatusUpdateModal';
-import { AuthModal } from './components/auth/AuthModal';
 import { Project } from './types';
 import { CopLogo } from './assets/CopLogo';
 
@@ -39,8 +38,6 @@ function AppContent() {
   const [statusModalProject, setStatusModalProject] = useState<Project | null>(null);
   const [editModalProject, setEditModalProject] = useState<Project | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup_area' | 'signup_pastor'>('login');
 
   // Automatically route to Role Dashboard on login
   useEffect(() => {
@@ -66,11 +63,6 @@ function AppContent() {
     }
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOpenAuthModal = (mode: 'login' | 'signup_area' | 'signup_pastor') => {
-    setAuthModalMode(mode);
-    setShowAuthModal(true);
   };
 
   const handleOpenStatusModal = (project: Project) => {
@@ -111,7 +103,6 @@ function AppContent() {
         currentPage={currentPage}
         onNavigate={handleNavigate}
         onOpenUploadModal={() => setShowUploadModal(true)}
-        onOpenAuthModal={handleOpenAuthModal}
       />
 
       {/* Main Content Area */}
@@ -129,7 +120,6 @@ function AppContent() {
                 onSelectProject={handleProjectSelect}
                 onOpenStatusModal={handleOpenStatusModal}
                 onOpenUploadModal={() => setShowUploadModal(true)}
-                onOpenAuthModal={handleOpenAuthModal}
               />
             )}
 
@@ -243,13 +233,6 @@ function AppContent() {
       <StatusUpdateModal
         project={statusModalProject}
         onClose={() => setStatusModalProject(null)}
-      />
-
-      <AuthModal
-        isOpen={showAuthModal}
-        initialMode={authModalMode}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={(targetPage) => handleNavigate(targetPage)}
       />
 
       {/* Corporate Church Footer */}

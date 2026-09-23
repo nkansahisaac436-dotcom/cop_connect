@@ -25,14 +25,12 @@ interface NavbarProps {
   currentPage: string;
   onNavigate: (page: string, params?: Record<string, string>) => void;
   onOpenUploadModal: () => void;
-  onOpenAuthModal: (mode: 'login' | 'signup_area' | 'signup_pastor') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   onNavigate,
   onOpenUploadModal,
-  onOpenAuthModal,
 }) => {
   const { currentUser, logout } = useAuth();
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useData();
@@ -396,22 +394,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onOpenAuthModal('login')}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold text-cop-blue-900 hover:bg-slate-100 transition-colors"
-                >
-                  {t('login')}
-                </button>
-                <button
-                  onClick={() => onOpenAuthModal('signup_pastor')}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-cop-blue-800 text-white hover:bg-cop-blue-900 shadow-sm transition-all"
-                >
-                  {t('register')}
-                </button>
-              </div>
-            )}
+            ) : null}
 
             {/* Mobile Menu Trigger */}
             <button

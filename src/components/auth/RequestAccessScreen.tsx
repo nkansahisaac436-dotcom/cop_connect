@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
-import { CopLogo } from '../../assets/CopLogo';
 import { compressImage } from '../../utils/imageCompressor';
 import { 
   UserCheck, 
@@ -13,13 +12,10 @@ import {
   ArrowRight, 
   AlertCircle, 
   CheckCircle2, 
-  Building2, 
-  MapPin, 
   Mail, 
   Phone, 
   Lock, 
-  FileText,
-  Sparkles,
+  Shield,
   Info
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -29,10 +25,10 @@ interface RequestAccessScreenProps {
 }
 
 const SAMPLE_AVATARS = [
-  { label: 'Minister Photo 1', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Minister Photo 2', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Minister Photo 3', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80' },
-  { label: 'Minister Photo 4', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Minister 1', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Minister 2', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Minister 3', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80' },
+  { label: 'Minister 4', url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80' },
 ];
 
 export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBackToLogin }) => {
@@ -40,7 +36,8 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
   const { areas, addArea } = useData();
 
   // Form State
-  const [claimedRole, setClaimedRole] = useState<'area_head' | 'pastor'>('pastor');
+  const hasExistingSuperAdmin = users.some((u) => u.role === 'super_admin');
+  const [claimedRole, setClaimedRole] = useState<'super_admin' | 'area_head' | 'pastor'>('pastor');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -101,7 +98,7 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
     }
 
     if (!profilePhoto) {
-      setError('A clear face or ID profile photo is required for identity verification.');
+      setError('A clear face or ID portrait photo is required for ministerial verification.');
       return;
     }
 
@@ -121,9 +118,10 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
       let areaNameToUse = '';
       let areaIdToUse = undefined;
 
-      if (claimedRole === 'area_head') {
+      if (claimedRole === 'super_admin') {
+        areaNameToUse = 'General Headquarters';
+      } else if (claimedRole === 'area_head') {
         areaNameToUse = customAreaName.trim();
-        // Check if area already exists in registry
         const existingArea = areas.find(
           (a) => a.name.toLowerCase() === areaNameToUse.toLowerCase()
         );
@@ -175,10 +173,24 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
   // Find Approver description for display
   const getApproverInfo = () => {
     if (!submittedUser) return null;
+    if (submittedUser.role === 'super_admin') {
+      if (submittedUser.status === 'approved') {
+        return {
+          title: 'General Headquarters Administration',
+          name: 'Primary Super Administrator',
+          scope: 'National Headquarters Scope',
+        };
+      }
+      return {
+        title: 'National Super Admin (General Headquarters)',
+        name: 'Existing General Secretariat Overseer',
+        scope: 'National Scope',
+      };
+    }
     if (submittedUser.role === 'area_head') {
       return {
         title: 'National Super Admin (General Headquarters)',
-        name: 'Rev. Dr. Samuel Kwadwo Boakye',
+        name: 'Head Office Administration',
         scope: 'National Scope',
       };
     } else {
@@ -194,148 +206,148 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center py-10 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(19,62,135,0.4),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.15),transparent_50%)]" />
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-cop-blue-700 via-cop-gold-500 to-cop-red-600" />
+    <div className="relative min-h-screen w-full flex flex-col justify-between items-center py-8 px-4 sm:px-6 lg:px-8 font-sans overflow-x-hidden">
+      
+      {/* Background Facility Photo */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-20"
+        style={{ backgroundImage: `url('/cop_convention_center.jpg')` }}
+      />
+      
+      {/* Dark Navy Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#091B33]/85 via-[#0B2545]/92 to-[#040D1A]/96 backdrop-blur-[2px] -z-10" />
 
-      <div className="relative w-full max-w-2xl space-y-6">
-        {/* Back Link */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onBackToLogin}
-            className="inline-flex items-center gap-2 text-xs font-bold text-cop-gold-300 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Login</span>
-          </button>
-          <div className="text-right">
-            <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
-              Verification Portal
-            </span>
-          </div>
-        </div>
+      {/* Top Gold Trim */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#002D72] via-[#F1B51C] to-[#002D72]" />
 
+      {/* Top Bar */}
+      <header className="w-full max-w-2xl flex items-center justify-between z-10 pt-2 pb-4">
+        <button
+          onClick={onBackToLogin}
+          className="inline-flex items-center gap-2 text-xs font-bold text-[#F1B51C] hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Sign In</span>
+        </button>
+        <span className="text-[11px] text-slate-300 font-bold uppercase tracking-widest">
+          Ministerial Access Gateway
+        </span>
+      </header>
+
+      {/* Main Content */}
+      <main className="w-full max-w-2xl z-10 space-y-4 my-auto">
+        
         {/* SUBMISSION CONFIRMATION VIEW */}
         {submittedUser ? (
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-10 space-y-6 animate-in fade-in zoom-in-95">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto ring-8 ring-emerald-100">
-                <CheckCircle2 className="w-10 h-10" />
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-5 animate-in fade-in zoom-in-95">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-4 ring-emerald-100">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h2 className="font-heading font-extrabold text-2xl text-slate-900">
-                Access Request Submitted!
+              <h2 className="font-serif font-bold text-2xl text-[#0B2545]">
+                {submittedUser.status === 'approved' ? 'Administrator Account Initialized!' : 'Access Request Submitted!'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                Thank you, <strong>{submittedUser.titlePrefix} {submittedUser.fullName}</strong>. Your account has been registered with status <span className="text-amber-700 font-bold bg-amber-100 px-2 py-0.5 rounded-full">PENDING</span>.
+              <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                Thank you, <strong>{submittedUser.titlePrefix} {submittedUser.fullName}</strong>. Your account has been registered with status{' '}
+                <span className={`font-bold px-2 py-0.5 rounded ${submittedUser.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                  {submittedUser.status.toUpperCase()}
+                </span>.
               </p>
             </div>
 
             {/* Routing Card */}
             {getApproverInfo() && (
-              <div className="bg-gradient-to-br from-cop-blue-900 to-cop-blue-950 rounded-2xl p-5 text-white space-y-3 border border-cop-gold-500/30">
-                <div className="flex items-center gap-2 text-cop-gold-300 text-xs font-bold uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4 text-cop-gold-400" />
-                  <span>Independent Approver Routing</span>
+              <div className="bg-gradient-to-br from-[#0B2545] to-[#040D1A] rounded-lg p-5 text-white space-y-2.5 border border-[#F1B51C]/30">
+                <div className="flex items-center gap-2 text-[#F1B51C] text-[11px] font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-[#F1B51C]" />
+                  <span>Approver Routing</span>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="text-xs text-slate-300">Your application has been routed directly to:</div>
-                  <div className="font-heading font-extrabold text-lg text-white">
+                <div className="space-y-0.5">
+                  <div className="text-[11px] text-slate-300">Your application has been routed to:</div>
+                  <div className="font-serif font-bold text-base text-white">
                     {getApproverInfo()?.name}
                   </div>
-                  <div className="text-xs text-cop-gold-300 font-semibold">
+                  <div className="text-xs text-[#F1B51C] font-semibold">
                     {getApproverInfo()?.title}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 text-[11px] text-slate-300 leading-relaxed">
+                <div className="pt-2 border-t border-white/10 text-[11px] text-slate-300 leading-relaxed">
                   {submittedUser.role === 'pastor' ? (
                     <span>
-                      Because the Area Head oversees pastors in <strong>{submittedUser.areaName}</strong>, Apostle {getApproverInfo()?.name} will independently verify your appointment for <strong>{submittedUser.districtName}</strong>. Once approved, you will be able to sign in immediately.
+                      Because the Area Head oversees ministers in <strong>{submittedUser.areaName}</strong>, your application for <strong>{submittedUser.districtName}</strong> will be independently verified. Once confirmed, you can log in directly.
+                    </span>
+                  ) : submittedUser.role === 'area_head' ? (
+                    <span>
+                      The National Super Admin at General Headquarters will verify your leadership over <strong>{submittedUser.areaName}</strong>. Once approved, your Area will be activated on the national network.
                     </span>
                   ) : (
                     <span>
-                      The National Super Admin at General Headquarters will verify your appointment over <strong>{submittedUser.areaName}</strong>. Once activated, your Area will go live and your district pastors will be able to register under you.
+                      You have initialized the General Headquarters National Super Admin account. You may now log in to oversee Area Head verifications and global access logs.
                     </span>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Next Steps */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-slate-700 space-y-2">
-              <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                <Info className="w-4 h-4 text-cop-blue-700" />
-                <span>What happens next?</span>
-              </div>
-              <ul className="list-disc pl-5 space-y-1 text-slate-600 text-[11px]">
-                <li>Your face verification photo and details are in the approver's queue.</li>
-                <li>When you attempt to sign in with your email/phone and password, your pending status will display.</li>
-                <li>Once approved by your superior, full dashboard and posting privileges are unlocked automatically.</li>
-              </ul>
-            </div>
-
             <button
               onClick={onBackToLogin}
-              className="w-full py-3.5 rounded-2xl bg-cop-blue-900 hover:bg-cop-blue-950 text-white font-heading font-extrabold text-sm shadow-cop transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-md bg-[#F1B51C] hover:bg-[#E5A812] text-[#091B33] font-bold text-xs uppercase tracking-wider shadow transition-all flex items-center justify-center gap-2"
             >
-              <span>Return to Login Screen</span>
-              <ArrowRight className="w-4 h-4 text-cop-gold-400" />
+              <span>Proceed to Login Screen</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         ) : (
           /* REGISTRATION FORM VIEW */
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-6 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-5 animate-in fade-in">
             {/* Header */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-cop-blue-800 text-xs font-bold uppercase tracking-wider">
-                <ShieldCheck className="w-4 h-4 text-cop-gold-600" />
-                <span>COP Identity & Access Request</span>
+            <div className="border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-[#002D72] text-[10px] font-bold uppercase tracking-widest">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#F1B51C]" />
+                <span>Identity Verification Protocol</span>
               </div>
-              <h2 className="font-heading font-extrabold text-2xl text-slate-900">
+              <h2 className="font-serif font-bold text-xl text-[#0B2545] uppercase tracking-wide mt-0.5">
                 Request Ministerial Account
               </h2>
               <p className="text-xs text-slate-500">
-                All accounts start from a formal request and are verified by your Area Head or Super Admin.
+                All accounts require formal superior clearance before dashboard and posting rights are granted.
               </p>
             </div>
 
             {error && (
-              <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div className="p-3 rounded-md bg-red-50 border border-red-300 text-red-700 text-xs font-semibold flex items-start gap-2 animate-in fade-in">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
                 <span className="leading-relaxed">{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               
               {/* 1. ROLE SELECTION */}
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  1. Select Your Claimed Role <span className="text-red-500">*</span>
+                <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider">
+                  1. Select Your Ministerial Role <span className="text-red-600">*</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div
                     onClick={() => {
                       setClaimedRole('pastor');
                       setTitlePrefix('Pastor');
                     }}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+                    className={`p-3 rounded-md border-2 cursor-pointer transition-all ${
                       claimedRole === 'pastor'
-                        ? 'border-cop-gold-500 bg-cop-gold-50/50 shadow-sm'
+                        ? 'border-[#002D72] bg-[#002D72]/5'
                         : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
-                    <div className={`p-2 rounded-xl ${claimedRole === 'pastor' ? 'bg-cop-gold-500 text-slate-950' : 'bg-slate-200 text-slate-600'}`}>
-                      <Users className="w-5 h-5" />
+                    <div className="flex items-center gap-2 font-bold text-xs text-[#0B2545]">
+                      <Users className="w-4 h-4 text-[#F1B51C]" />
+                      <span>District Pastor</span>
                     </div>
-                    <div>
-                      <div className="font-bold text-sm text-slate-900">District Pastor</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Assigned to 1 District. Verified by your Area Head.
-                      </div>
+                    <div className="text-[10px] text-slate-500 mt-1">
+                      Assigned to 1 District. Verified by Area Head.
                     </div>
                   </div>
 
@@ -344,57 +356,77 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
                       setClaimedRole('area_head');
                       setTitlePrefix('Apostle');
                     }}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+                    className={`p-3 rounded-md border-2 cursor-pointer transition-all ${
                       claimedRole === 'area_head'
-                        ? 'border-cop-blue-700 bg-cop-blue-50/50 shadow-sm'
+                        ? 'border-[#002D72] bg-[#002D72]/5'
                         : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
-                    <div className={`p-2 rounded-xl ${claimedRole === 'area_head' ? 'bg-cop-blue-800 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                      <UserCheck className="w-5 h-5" />
+                    <div className="flex items-center gap-2 font-bold text-xs text-[#0B2545]">
+                      <UserCheck className="w-4 h-4 text-[#F1B51C]" />
+                      <span>Area Head (Apostle)</span>
                     </div>
-                    <div>
-                      <div className="font-bold text-sm text-slate-900">Area Head (Apostle)</div>
-                      <div className="text-[11px] text-slate-500 mt-0.5">
-                        Assigned to 1 Area. Verified by Super Admin.
-                      </div>
+                    <div className="text-[10px] text-slate-500 mt-1">
+                      Assigned to 1 Area. Verified by Super Admin.
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => {
+                      setClaimedRole('super_admin');
+                      setTitlePrefix('Rev. Dr.');
+                    }}
+                    className={`p-3 rounded-md border-2 cursor-pointer transition-all ${
+                      claimedRole === 'super_admin'
+                        ? 'border-[#002D72] bg-[#002D72]/5'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-bold text-xs text-[#0B2545]">
+                      <Shield className="w-4 h-4 text-[#F1B51C]" />
+                      <span>Super Admin (HQ)</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 mt-1">
+                      General Headquarters national administration.
                     </div>
                   </div>
                 </div>
+
+                {!hasExistingSuperAdmin && claimedRole === 'super_admin' && (
+                  <div className="p-2.5 rounded-md bg-[#002D72]/5 border border-[#002D72]/20 text-[11px] text-[#002D72] flex items-start gap-1.5">
+                    <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#002D72]" />
+                    <span>
+                      <strong>Root Setup Notice:</strong> As no Super Admin account currently exists, submitting this form will initialize the primary General Headquarters administrator.
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* 2. REQUIRED FACE / ID PHOTO UPLOAD */}
+              {/* 2. REQUIRED PORTRAIT / FACE PHOTO UPLOAD */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  2. Face / ID Photo Upload (Required for Identity Verification) <span className="text-red-500">*</span>
+                <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider">
+                  2. Face / ID Portrait Photo (Required for Identity Verification) <span className="text-red-600">*</span>
                 </label>
-                <p className="text-[11px] text-slate-500">
-                  Approvers inspect this clear portrait to confirm your identity before granting church access.
-                </p>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  {/* Photo Preview */}
-                  <div className="relative flex-shrink-0">
-                    {profilePhoto ? (
-                      <img
-                        src={profilePhoto}
-                        alt="Profile Preview"
-                        className="w-20 h-20 rounded-2xl object-cover ring-2 ring-cop-gold-500 shadow-md"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-2xl bg-slate-200 border-2 border-dashed border-slate-400 flex flex-col items-center justify-center text-slate-400">
-                        <Camera className="w-6 h-6" />
-                        <span className="text-[9px] font-bold mt-1">Photo</span>
-                      </div>
-                    )}
-                  </div>
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-3.5 rounded-md border border-slate-200">
+                  {profilePhoto ? (
+                    <img
+                      src={profilePhoto}
+                      alt="Portrait Preview"
+                      className="w-16 h-16 rounded-md object-cover ring-2 ring-[#002D72] shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-md bg-slate-200 border-2 border-dashed border-slate-400 flex flex-col items-center justify-center text-slate-500">
+                      <Camera className="w-5 h-5" />
+                      <span className="text-[8px] font-bold mt-0.5">Photo</span>
+                    </div>
+                  )}
 
-                  {/* Uploader Controls */}
-                  <div className="flex-1 space-y-2 w-full">
+                  <div className="flex-1 space-y-1.5 w-full">
                     <div className="flex items-center gap-2">
-                      <label className="cursor-pointer px-4 py-2 rounded-xl bg-cop-blue-900 hover:bg-cop-blue-950 text-white text-xs font-bold flex items-center gap-1.5 shadow transition-colors">
+                      <label className="cursor-pointer px-3.5 py-1.5 rounded-md bg-[#002D72] hover:bg-[#091B33] text-white text-xs font-bold flex items-center gap-1.5 shadow transition-colors">
                         <Upload className="w-3.5 h-3.5" />
-                        <span>Upload Face Photo</span>
+                        <span>Upload Portrait Photo</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -403,32 +435,27 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
                         />
                       </label>
                       {profilePhoto && (
-                        <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="w-4 h-4" />
-                          Photo Selected
+                        <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Photo Attached
                         </span>
                       )}
                     </div>
 
-                    {/* Preset sample avatars for quick browser testing */}
-                    <div className="space-y-1">
-                      <div className="text-[10px] font-semibold text-slate-500">
-                        Or select quick demo photo:
-                      </div>
-                      <div className="flex items-center gap-2 overflow-x-auto py-1">
-                        {SAMPLE_AVATARS.map((s, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setProfilePhoto(s.url)}
-                            className={`p-0.5 rounded-lg border-2 transition-all flex-shrink-0 ${
-                              profilePhoto === s.url ? 'border-cop-gold-500 ring-2 ring-cop-gold-400' : 'border-transparent opacity-70 hover:opacity-100'
-                            }`}
-                          >
-                            <img src={s.url} alt={s.label} className="w-8 h-8 rounded-md object-cover" />
-                          </button>
-                        ))}
-                      </div>
+                    <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+                      <span className="text-[10px] text-slate-400 font-medium">Or quick sample:</span>
+                      {SAMPLE_AVATARS.map((s, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setProfilePhoto(s.url)}
+                          className={`p-0.5 rounded border transition-all ${
+                            profilePhoto === s.url ? 'border-[#002D72] ring-1 ring-[#002D72]' : 'border-transparent opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <img src={s.url} alt={s.label} className="w-6 h-6 rounded object-cover" />
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -436,19 +463,24 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
 
               {/* 3. PERSONAL DETAILS */}
               <div className="space-y-3 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  3. Minister Contact & Profile
+                <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider">
+                  3. Minister Details
                 </label>
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Title</label>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">Title</label>
                     <select
                       value={titlePrefix}
                       onChange={(e) => setTitlePrefix(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                      className="w-full px-2.5 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-800"
                     >
-                      {claimedRole === 'area_head' ? (
+                      {claimedRole === 'super_admin' ? (
+                        <>
+                          <option value="Rev. Dr.">Rev. Dr.</option>
+                          <option value="Apostle">Apostle</option>
+                        </>
+                      ) : claimedRole === 'area_head' ? (
                         <>
                           <option value="Apostle">Apostle</option>
                           <option value="Apostle Dr.">Apostle Dr.</option>
@@ -467,87 +499,86 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
                   </div>
 
                   <div className="col-span-2">
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Full Name <span className="text-red-500">*</span>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Full Name <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Isaac Kwadwo Mensah"
-                      className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                      className="w-full px-3 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs font-semibold focus:outline-none focus:border-[#002D72]"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Email Address <span className="text-red-500">*</span>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Official Email <span className="text-red-600">*</span>
                     </label>
                     <div className="relative">
-                      <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="pastor.name@copconnect.org"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                        className="w-full pl-8 pr-3 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs focus:outline-none focus:border-[#002D72]"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Phone Number <span className="text-red-500">*</span>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Phone Number <span className="text-red-600">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+233 24 000 0000"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                        className="w-full pl-8 pr-3 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs focus:outline-none focus:border-[#002D72]"
                         required
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Password Setup */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Create Password <span className="text-red-500">*</span>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Password <span className="text-red-600">*</span>
                     </label>
                     <div className="relative">
-                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Min 6 characters"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                        className="w-full pl-8 pr-3 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs focus:outline-none focus:border-[#002D72]"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                      Confirm Password <span className="text-red-500">*</span>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                      Confirm Password <span className="text-red-600">*</span>
                     </label>
                     <div className="relative">
-                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Re-enter password"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                        className="w-full pl-8 pr-3 py-2 rounded-md bg-slate-50 border border-slate-300 text-xs focus:outline-none focus:border-[#002D72]"
                         required
                       />
                     </div>
@@ -555,113 +586,101 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
                 </div>
               </div>
 
-              {/* 4. JURISDICTION & ASSIGNMENT */}
-              <div className="space-y-3 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  4. Hierarchy & Assignment
-                </label>
+              {/* 4. HIERARCHY & ASSIGNMENT */}
+              {claimedRole !== 'super_admin' && (
+                <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                  <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider">
+                    4. Area & District Jurisdiction
+                  </label>
 
-                {claimedRole === 'area_head' ? (
-                  /* Area Head Assignment: Declare Area */
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-cop-blue-900 mb-1">
-                        Area Name You Head <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={customAreaName}
-                        onChange={(e) => setCustomAreaName(e.target.value)}
-                        placeholder="e.g. Cape Coast Area / Sunyani Area / Dallas Area"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-900"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
+                  {claimedRole === 'area_head' ? (
+                    <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-2">
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Region / State</label>
+                        <label className="block text-[10px] font-bold text-[#0B2545] mb-0.5">
+                          Area Name You Head <span className="text-red-600">*</span>
+                        </label>
                         <input
                           type="text"
-                          value={region}
-                          onChange={(e) => setRegion(e.target.value)}
-                          placeholder="e.g. Central Region"
-                          className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs"
+                          value={customAreaName}
+                          onChange={(e) => setCustomAreaName(e.target.value)}
+                          placeholder="e.g. Cape Coast Area / Sunyani Area"
+                          className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-bold text-slate-900"
                           required
                         />
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Country</label>
-                        <input
-                          type="text"
-                          value={country}
-                          onChange={(e) => setCountry(e.target.value)}
-                          placeholder="e.g. Ghana / USA"
-                          className="w-full px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Pastor Assignment: Select Area & District */
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-cop-blue-900 mb-1">
-                        Select Your Area <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        value={selectedAreaId}
-                        onChange={(e) => setSelectedAreaId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-900"
-                        required
-                      >
-                        {areas.map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.name} ({a.region}, {a.country})
-                          </option>
-                        ))}
-                      </select>
 
-                      {selectedArea && (
-                        <div className="mt-1.5 text-[11px] text-cop-blue-800 font-semibold flex items-center gap-1">
-                          <UserCheck className="w-3.5 h-3.5 text-cop-gold-600" />
-                          <span>
-                            Approving Area Head:{' '}
-                            <strong>{selectedArea.areaHeadName || 'Assigned Area Head'}</strong>
-                          </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Region</label>
+                          <input
+                            type="text"
+                            value={region}
+                            onChange={(e) => setRegion(e.target.value)}
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-300 text-xs"
+                            required
+                          />
                         </div>
-                      )}
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-0.5">Country</label>
+                          <input
+                            type="text"
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
+                            className="w-full px-2.5 py-1.5 rounded-md bg-white border border-slate-300 text-xs"
+                            required
+                          />
+                        </div>
+                      </div>
                     </div>
+                  ) : (
+                    <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-[#0B2545] mb-0.5">
+                          Select Your Area <span className="text-red-600">*</span>
+                        </label>
+                        <select
+                          value={selectedAreaId}
+                          onChange={(e) => setSelectedAreaId(e.target.value)}
+                          className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-bold text-slate-900"
+                          required
+                        >
+                          {areas.map((a) => (
+                            <option key={a.id} value={a.id}>
+                              {a.name} ({a.region}, {a.country})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Assigned District Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={districtName}
-                        onChange={(e) => setDistrictName(e.target.value)}
-                        placeholder="e.g. Darkuman District / Kaneshie Central"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900"
-                        required
-                      />
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-700 mb-0.5">
+                          Assigned District Name <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={districtName}
+                          onChange={(e) => setDistrictName(e.target.value)}
+                          placeholder="e.g. Darkuman District / Kaneshie Central"
+                          className="w-full px-3 py-2 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-900"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
-              {/* 5. OPTIONAL NOTE */}
+              {/* 5. NOTES */}
               <div className="space-y-1 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                  5. Optional Note to Approver
+                <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider">
+                  5. Remarks / Note to Superior
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  placeholder="e.g. Appointed by Executive Council in December 2025; formerly in Sunyani Area."
-                  className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-cop-blue-600"
+                  placeholder="Optional appointment or transfer context..."
+                  className="w-full p-2.5 rounded-md bg-slate-50 border border-slate-300 text-xs focus:outline-none focus:border-[#002D72]"
                 />
               </div>
 
@@ -669,15 +688,20 @@ export const RequestAccessScreen: React.FC<RequestAccessScreenProps> = ({ onBack
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cop-blue-900 via-cop-blue-800 to-cop-blue-900 hover:from-cop-blue-950 text-white font-heading font-extrabold text-sm shadow-cop hover:shadow-cop-lg transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-md bg-[#F1B51C] hover:bg-[#E5A812] text-[#091B33] font-bold text-xs uppercase tracking-wider shadow transition-all flex items-center justify-center gap-2"
               >
-                <span>Submit Access Request for Verification</span>
-                <ArrowRight className="w-4 h-4 text-cop-gold-400" />
+                <span>Submit Access Request</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           </div>
         )}
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full max-w-2xl text-center py-2 text-slate-400 text-[10px] z-10">
+        The Church of Pentecost Worldwide &bull; Verified Leadership Intranet
+      </footer>
     </div>
   );
 };
