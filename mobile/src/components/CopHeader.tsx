@@ -1,21 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { Shield, UserCheck, Users, LogOut } from 'lucide-react-native';
+import { LogOut, Shield, UserCheck, Users } from 'lucide-react-native';
 
-interface CopHeaderProps {
-  onOpenAuth?: () => void;
-}
-
-export const CopHeader: React.FC<CopHeaderProps> = ({ onOpenAuth }) => {
-  const { currentUser, loginAs, logout } = useAuth();
+export const CopHeader: React.FC = () => {
+  const { currentUser, logout } = useAuth();
 
   return (
     <View style={styles.headerContainer}>
       <View style={styles.headerTop}>
         <View style={styles.logoRow}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoBadgeText}>COP</Text>
+          <View style={styles.emblemWrapper}>
+            <Image
+              source={require('../../assets/cop_emblem_circle.png')}
+              style={styles.emblemImage}
+              resizeMode="contain"
+            />
           </View>
           <View>
             <Text style={styles.headerTitle}>COP CONNECT</Text>
@@ -23,42 +23,27 @@ export const CopHeader: React.FC<CopHeaderProps> = ({ onOpenAuth }) => {
           </View>
         </View>
 
-        {currentUser ? (
+        {currentUser && (
           <TouchableOpacity onPress={logout} style={styles.userBadge}>
+            <View style={styles.roleIcon}>
+              {currentUser.role === 'super_admin' ? (
+                <Shield size={12} color="#F1B51C" />
+              ) : currentUser.role === 'area_head' ? (
+                <UserCheck size={12} color="#F1B51C" />
+              ) : (
+                <Users size={12} color="#F1B51C" />
+              )}
+            </View>
             <Text style={styles.userRoleText}>
-              {currentUser.role === 'super_admin' ? 'Super Admin' : currentUser.role === 'area_head' ? 'Area Head' : 'Pastor'}
+              {currentUser.role === 'super_admin'
+                ? 'HQ Admin'
+                : currentUser.role === 'area_head'
+                ? 'Area Head'
+                : 'Pastor'}
             </Text>
-            <LogOut size={14} color="#F59E0B" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={onOpenAuth} style={styles.signInBtn}>
-            <Text style={styles.signInText}>Sign In</Text>
+            <LogOut size={13} color="#F1B51C" />
           </TouchableOpacity>
         )}
-      </View>
-
-      {/* Quick Role Tester Pills */}
-      <View style={styles.roleSwitcherRow}>
-        <TouchableOpacity 
-          onPress={() => loginAs('usr_super_admin')} 
-          style={[styles.rolePill, currentUser?.role === 'super_admin' && styles.rolePillActive]}
-        >
-          <Text style={[styles.rolePillText, currentUser?.role === 'super_admin' && styles.rolePillTextActive]}>Admin</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={() => loginAs('usr_area_kaneshie')} 
-          style={[styles.rolePill, currentUser?.role === 'area_head' && styles.rolePillActive]}
-        >
-          <Text style={[styles.rolePillText, currentUser?.role === 'area_head' && styles.rolePillTextActive]}>Area Head</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          onPress={() => loginAs('usr_pastor_kaneshie_central')} 
-          style={[styles.rolePill, currentUser?.role === 'pastor' && styles.rolePillActive]}
-        >
-          <Text style={[styles.rolePillText, currentUser?.role === 'pastor' && styles.rolePillTextActive]}>Pastor</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -66,12 +51,12 @@ export const CopHeader: React.FC<CopHeaderProps> = ({ onOpenAuth }) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: '#0B2545',
+    backgroundColor: '#091B33',
     paddingTop: 48,
     paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: '#F59E0B',
+    paddingBottom: 14,
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(241, 181, 28, 0.4)',
   },
   headerTop: {
     flexDirection: 'row',
@@ -83,83 +68,49 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  logoBadge: {
+  emblemWrapper: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#133E87',
-    borderWidth: 2,
-    borderColor: '#F59E0B',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F1B51C',
   },
-  logoBadgeText: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: 12,
-    letterSpacing: 1,
+  emblemImage: {
+    width: 32,
+    height: 32,
   },
   headerTitle: {
     color: '#FFFFFF',
     fontWeight: '900',
     fontSize: 16,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   headerSubtitle: {
-    color: '#F59E0B',
-    fontSize: 11,
+    color: '#F1B51C',
+    fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
   userBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#133E87',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 8,
     gap: 6,
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: 'rgba(241, 181, 28, 0.4)',
+  },
+  roleIcon: {
+    marginRight: -2,
   },
   userRoleText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
-  },
-  signInBtn: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  signInText: {
-    color: '#0B2545',
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  roleSwitcherRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-  rolePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: '#133E87',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  rolePillActive: {
-    backgroundColor: '#F59E0B',
-    borderColor: '#F59E0B',
-  },
-  rolePillText: {
-    color: '#CBD5E1',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  rolePillTextActive: {
-    color: '#0B2545',
   },
 });

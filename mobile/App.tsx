@@ -20,22 +20,22 @@ import { Building2, UserCheck, Shield, PlusCircle, LogIn } from 'lucide-react-na
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function MainTabs({ navigation }: { navigation: any }) {
+function MainTabs() {
   const { currentUser } = useAuth();
 
   return (
     <Tab.Navigator
       screenOptions={{
-        header: () => <CopHeader onOpenAuth={() => navigation.navigate('Auth')} />,
+        header: () => <CopHeader />,
         tabBarStyle: {
-          backgroundColor: '#0B2545',
-          borderTopColor: '#F59E0B',
+          backgroundColor: '#091B33',
+          borderTopColor: '#F1B51C',
           borderTopWidth: 1,
-          height: 60,
+          height: 62,
           paddingBottom: 8,
           paddingTop: 6,
         },
-        tabBarActiveTintColor: '#F59E0B',
+        tabBarActiveTintColor: '#F1B51C',
         tabBarInactiveTintColor: '#94A3B8',
         tabBarLabelStyle: {
           fontSize: 10,
@@ -93,16 +93,25 @@ function MainTabs({ navigation }: { navigation: any }) {
           tabBarIcon: ({ color }) => <PlusCircle size={20} color={color} />,
         }}
       />
-
-      <Tab.Screen
-        name="Account"
-        component={AuthScreen}
-        options={{
-          tabBarLabel: 'Account',
-          tabBarIcon: ({ color }) => <LogIn size={20} color={color} />,
-        }}
-      />
     </Tab.Navigator>
+  );
+}
+
+function NavigationRoot() {
+  const { currentUser } = useAuth();
+
+  // Root Gateway: If no verified user session exists, launch directly to official LoginScreen
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
+
+  return (
+    <NavigationContainer>
+      <StatusBar style="light" />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Main" component={MainTabs} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -110,13 +119,7 @@ export default function App() {
   return (
     <AuthProvider>
       <DataProvider>
-        <NavigationContainer>
-          <StatusBar style="light" />
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen name="Auth" component={AuthScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <NavigationRoot />
       </DataProvider>
     </AuthProvider>
   );
