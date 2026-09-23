@@ -12,16 +12,26 @@
       "backgroundColor": "#0B2545"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.thecophq.copconnect"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0B2545"
+      },
+      "package": "org.thecophq.copconnect"
+    },
+    "owner": "heaven_bound",
+    "extra": {
+      "eas": {
+        "projectId": "08275e61-9a3e-477f-88f5-f82894fffe7a"
       }
     },
-    "plugins": [
-      "expo-asset",
-      "expo-font"
-    ]
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/08275e61-9a3e-477f-88f5-f82894fffe7a"
+    }
   }
 }
