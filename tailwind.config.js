@@ -46,6 +46,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
       },
       boxShadow: {
         'cop': '0 4px 20px -2px rgba(11, 37, 69, 0.08), 0 2px 6px -2px rgba(11, 37, 69, 0.04)',

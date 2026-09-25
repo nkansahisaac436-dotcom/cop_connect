@@ -5,13 +5,13 @@ import {
   Mail, 
   Eye, 
   EyeOff, 
-  ShieldCheck, 
   AlertCircle, 
   Clock, 
   KeyRound, 
   ArrowRight, 
   UserCheck, 
-  ShieldAlert
+  ShieldAlert,
+  ArrowLeft
 } from 'lucide-react';
 
 interface LoginScreenProps {
@@ -25,6 +25,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 }) => {
   const { login, verify2FA, cancel2FA, twoFactorPendingUser, isLoading } = useAuth();
 
+  // Mode: 'splash' | 'form'
+  const [viewMode, setViewMode] = useState<'splash' | 'form'>('splash');
+
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +35,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [pendingStatusInfo, setPendingStatusInfo] = useState<string | null>(null);
   const [lockoutMinutes, setLockoutMinutes] = useState<number | null>(null);
+
+  // Auto-switch to form view if 2FA becomes pending
+  useEffect(() => {
+    if (twoFactorPendingUser) {
+      setViewMode('form');
+    }
+  }, [twoFactorPendingUser]);
 
   // Auto-clear notices when user edits fields
   useEffect(() => {
@@ -86,248 +96,262 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between items-center py-10 px-4 sm:px-6 lg:px-8 font-sans overflow-x-hidden">
+    <div className="relative min-h-screen w-full flex flex-col justify-center items-center py-10 px-4 sm:px-6 lg:px-8 font-sans overflow-x-hidden bg-[#EFEBE2]">
       
-      {/* Background: Subtle Darkened Church Facility Photograph */}
+      {/* Background: Dimmed Campus Atmosphere Photo */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-20"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat -z-20 scale-105 transition-transform duration-1000"
         style={{ backgroundImage: `url('/cop_convention_center.jpg')` }}
       />
       
-      {/* Deep Institutional Navy Blue Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#091B33]/85 via-[#0B2545]/92 to-[#040D1A]/96 backdrop-blur-[2px] -z-10" />
+      {/* Deep Navy Veil for Maximum Legibility */}
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{
+          background: 'linear-gradient(180deg, rgba(9,15,32,0.88) 0%, rgba(12,20,42,0.58) 30%, rgba(12,20,42,0.50) 60%, rgba(6,11,24,0.94) 100%)'
+        }}
+      />
 
-      {/* Top COP Gold Trim Line */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#002D72] via-[#F1B51C] to-[#002D72]" />
-
-      {/* Header Banner */}
-      <header className="w-full max-w-md text-center pt-2 space-y-1 z-10">
-        <div className="inline-block px-3 py-1 rounded bg-[#091B33]/80 border border-[#F1B51C]/30 text-[#F1B51C] text-[10px] font-bold tracking-widest uppercase">
-          Vision 2028: Possessing the Nations
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="w-full max-w-md my-auto z-10 space-y-5">
+      {/* Main Hero / Login Stage */}
+      <div className="w-full max-w-[340px] sm:max-w-[380px] z-10 transition-all duration-300">
         
-        {/* Official COP Centerpiece Emblem */}
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <div className="relative p-2.5 rounded-full bg-white shadow-2xl border-2 border-[#F1B51C]/80 ring-4 ring-black/20">
-            <img
-              src="/cop_emblem_official.png"
-              alt="The Church of Pentecost Official Seal"
-              className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
-            />
-          </div>
-
-          <div className="space-y-0.5">
-            <h1 className="font-serif font-black text-2xl sm:text-3xl text-white tracking-wider uppercase drop-shadow-md">
-              THE CHURCH OF PENTECOST
-            </h1>
-            <p className="text-xs font-bold text-[#F1B51C] tracking-widest uppercase">
-              COP Connect &bull; Ministerial Intranet
-            </p>
-          </div>
-        </div>
-
-        {/* Authentication Card */}
-        <div className="bg-white rounded-xl shadow-2xl border border-slate-200 p-6 sm:p-8 space-y-5">
+        {/* Phone / Glass Shield Stage Card */}
+        <div className="relative rounded-[32px] bg-[#060B18]/80 backdrop-blur-md p-6 sm:p-7 shadow-[0_30px_60px_-25px_rgba(19,35,73,0.7)] border border-white/10 flex flex-col items-center text-center">
           
-          {/* 2FA Challenge View */}
-          {twoFactorPendingUser ? (
-            <div className="space-y-4">
-              <div className="text-center space-y-1.5">
-                <div className="w-12 h-12 bg-[#0B2545]/10 text-[#002D72] rounded-lg flex items-center justify-center mx-auto border border-[#002D72]/20">
-                  <KeyRound className="w-6 h-6 text-[#002D72]" />
-                </div>
-                <h2 className="font-serif font-bold text-xl text-[#0B2545]">
-                  Two-Factor Verification
-                </h2>
-                <p className="text-xs text-slate-600">
-                  Leadership verification for{' '}
-                  <strong className="text-slate-900">{twoFactorPendingUser.fullName}</strong> (
-                  <span className="text-[#002D72] font-bold uppercase text-[11px]">
-                    {twoFactorPendingUser.role.replace('_', ' ')}
-                  </span>
-                  ).
-                </p>
+          {/* 1. Official Centerpiece Halo & Raised Badge */}
+          <div className="relative w-[140px] h-[140px] flex items-center justify-center my-1">
+            {/* Halo Arc */}
+            <div 
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'conic-gradient(from -40deg, #D4A017 0deg 95deg, transparent 95deg 180deg, #C0392B 180deg 210deg, transparent 210deg 360deg)',
+                WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+                mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+                opacity: 0.95
+              }}
+            />
+
+            {/* Raised White Emblem Badge */}
+            <div className="w-[110px] h-[110px] rounded-full bg-white flex items-center justify-center p-3 shadow-[0_8px_24px_rgba(0,0,0,0.35)] ring-1 ring-black/10">
+              <img
+                src="/cop_emblem_official.png"
+                alt="The Church of Pentecost Official Seal"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+
+          {/* 2. Institutional Title & Wordmark */}
+          <div className="mt-5 space-y-1">
+            <div className="text-[12px] sm:text-[12.5px] text-[#DCE3F2] tracking-[0.5px] font-medium uppercase">
+              THE CHURCH OF PENTECOST
+            </div>
+            <div className="font-serif font-bold text-2xl sm:text-3xl text-white tracking-wide">
+              COP <em className="not-italic text-[#D4A017] italic font-normal">Connect</em>
+            </div>
+          </div>
+
+          {/* Gold Divider Line */}
+          <div 
+            className="w-[46px] h-[2px] my-3.5" 
+            style={{ backgroundColor: '#D4A017' }} 
+          />
+
+          <div className="text-[#C6CEE4] text-[12.5px] tracking-[0.3px] font-normal">
+            Official ministerial intranet
+          </div>
+
+          {/* 3. VIEW SWITCHER: Hero CTA Mode vs Interactive Login Form */}
+          {viewMode === 'splash' && !twoFactorPendingUser ? (
+            <div className="w-full mt-7 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {/* Primary Gold CTA */}
+              <button
+                onClick={() => setViewMode('form')}
+                className="w-full py-3.5 px-4 rounded-[4px] bg-[#D4A017] hover:bg-[#C29112] active:bg-[#B38309] text-[#241C08] font-semibold text-[13.5px] tracking-wide transition-all transform hover:-translate-y-0.5 shadow-md flex items-center justify-center gap-2"
+              >
+                <span>Continue to sign in</span>
+                <ArrowRight className="w-4 h-4 text-[#241C08]" />
+              </button>
+
+              {/* Secondary Request Access Button */}
+              <button
+                onClick={onRequestAccess}
+                className="w-full py-2.5 px-4 rounded-[4px] bg-white/5 hover:bg-white/10 text-[#DCE3F2] hover:text-white font-medium text-[12.5px] transition-colors border border-white/10 flex items-center justify-center gap-1.5"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-[#D4A017]" />
+                <span>Request access</span>
+              </button>
+            </div>
+          ) : (
+            /* Interactive Login & 2FA Form Container */
+            <div className="w-full mt-5 text-left space-y-3.5 animate-in fade-in zoom-in-95 duration-200">
+              
+              {/* Back to Hero Preview */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('splash')}
+                  className="text-[11.5px] text-[#C6CEE4] hover:text-white font-medium inline-flex items-center gap-1 transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-[#D4A017]" />
+                  <span>Overview</span>
+                </button>
+                <span className="text-[11px] font-semibold text-[#D4A017] uppercase tracking-wider">
+                  {twoFactorPendingUser ? '2FA Verification' : 'Sign In'}
+                </span>
               </div>
 
-              {error && (
-                <div className="p-3 rounded-md bg-red-50 border border-red-300 text-red-700 text-xs font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
-                  <span>{error}</span>
-                </div>
-              )}
+              {/* 2FA Mode */}
+              {twoFactorPendingUser ? (
+                <form onSubmit={handle2FASubmit} className="space-y-3">
+                  <div className="text-center space-y-1">
+                    <p className="text-[12px] text-slate-300">
+                      Security code for <strong className="text-white">{twoFactorPendingUser.fullName}</strong>
+                    </p>
+                  </div>
 
-              <form onSubmit={handle2FASubmit} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5 text-center uppercase tracking-wider">
-                    Enter 6-Digit Authenticator Code
-                  </label>
+                  {error && (
+                    <div className="p-2.5 rounded bg-red-950/60 border border-red-500/50 text-red-200 text-[11px] flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
                   <input
                     type="text"
                     maxLength={6}
                     value={twoFactorCode}
                     onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
                     placeholder="••••••"
-                    className="w-full text-center tracking-[0.5em] font-mono font-black text-2xl py-2.5 rounded-md bg-slate-50 border-2 border-slate-300 focus:border-[#002D72] focus:bg-white focus:outline-none transition-all"
+                    className="w-full text-center tracking-[0.4em] font-mono font-bold text-xl py-2 rounded bg-black/40 border border-white/20 text-white focus:border-[#D4A017] focus:outline-none"
                     autoFocus
                     required
                   />
-                </div>
 
-                <div className="flex flex-col gap-2 pt-1">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 rounded-md bg-[#F1B51C] hover:bg-[#E5A812] text-[#091B33] font-bold text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-[4px] bg-[#D4A017] hover:bg-[#C29112] text-[#241C08] font-bold text-[13px] uppercase tracking-wide transition-all"
                   >
-                    <span>Verify & Continue</span>
-                    <ArrowRight className="w-4 h-4" />
+                    Verify & Continue
                   </button>
 
                   <button
                     type="button"
                     onClick={cancel2FA}
-                    className="w-full py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold"
+                    className="w-full text-center text-[11.5px] text-slate-400 hover:text-white"
                   >
-                    Return to Login
+                    Cancel
                   </button>
-                </div>
-              </form>
-            </div>
-          ) : (
-            /* Standard Login View */
-            <div className="space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h2 className="font-serif font-bold text-lg text-[#0B2545] uppercase tracking-wide">
-                  Minister Sign In
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Enter your credentials to access the verified network.
-                </p>
-              </div>
+                </form>
+              ) : (
+                /* Standard Credentials Form */
+                <form onSubmit={handleLoginSubmit} className="space-y-3">
+                  
+                  {/* Status Alerts */}
+                  {pendingStatusInfo && (
+                    <div className="p-2.5 rounded bg-amber-950/60 border border-amber-500/50 text-amber-200 text-[11px] space-y-0.5">
+                      <div className="font-bold flex items-center gap-1 text-amber-300">
+                        <Clock className="w-3.5 h-3.5 animate-spin" />
+                        <span>Pending Verification</span>
+                      </div>
+                      <p className="text-[10.5px] text-amber-200/90">{pendingStatusInfo}</p>
+                    </div>
+                  )}
 
-              {/* Status Alert: Pending Verification */}
-              {pendingStatusInfo && (
-                <div className="p-3.5 rounded-md bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-1 animate-in fade-in">
-                  <div className="font-bold flex items-center gap-1.5 text-amber-900 text-xs">
-                    <Clock className="w-4 h-4 text-amber-700 animate-spin" />
-                    <span>Application Pending Verification</span>
+                  {lockoutMinutes && (
+                    <div className="p-2.5 rounded bg-red-950/60 border border-red-500/50 text-red-200 text-[11px] space-y-0.5">
+                      <div className="font-bold flex items-center gap-1 text-red-300">
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        <span>Security Lockout</span>
+                      </div>
+                      <p className="text-[10.5px]">Please retry in ~{lockoutMinutes} min.</p>
+                    </div>
+                  )}
+
+                  {error && !pendingStatusInfo && !lockoutMinutes && (
+                    <div className="p-2.5 rounded bg-red-950/60 border border-red-500/50 text-red-200 text-[11.5px] flex items-start gap-1.5">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-400" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {/* Identifier Input */}
+                  <div>
+                    <label className="block text-[10.5px] font-semibold text-[#DCE3F2] uppercase tracking-wider mb-1">
+                      Email or Phone
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        placeholder="pastor@copconnect.org"
+                        className="w-full pl-8 pr-3 py-2 rounded bg-black/40 border border-white/20 focus:border-[#D4A017] text-white text-[12px] focus:outline-none transition-colors"
+                        required
+                      />
+                    </div>
                   </div>
-                  <p className="leading-relaxed text-[11px]">{pendingStatusInfo}</p>
-                </div>
-              )}
 
-              {/* Status Alert: Lockout Notice */}
-              {lockoutMinutes && (
-                <div className="p-3.5 rounded-md bg-red-50 border border-red-300 text-red-950 text-xs space-y-1 animate-in fade-in">
-                  <div className="font-bold flex items-center gap-1.5 text-red-900 text-xs">
-                    <ShieldAlert className="w-4 h-4 text-red-600" />
-                    <span>Account Locked (Security Protection)</span>
+                  {/* Password Input */}
+                  <div>
+                    <label className="block text-[10.5px] font-semibold text-[#DCE3F2] uppercase tracking-wider mb-1">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-8 pr-8 py-2 rounded bg-black/40 border border-white/20 focus:border-[#D4A017] text-white text-[12px] focus:outline-none transition-colors"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
-                  <p className="leading-relaxed text-[11px]">
-                    5 consecutive failed attempts. To protect church data, please wait approximately{' '}
-                    <strong>{lockoutMinutes} minute(s)</strong>.
-                  </p>
-                </div>
-              )}
 
-              {/* Error Notice */}
-              {error && !pendingStatusInfo && !lockoutMinutes && (
-                <div className="p-3 rounded-md bg-red-50 border border-red-300 text-red-700 text-xs font-semibold flex items-start gap-2 animate-in fade-in">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600" />
-                  <span className="leading-relaxed">{error}</span>
-                </div>
-              )}
+                  {/* Sign In Button */}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full mt-2 py-3 rounded-[3px] bg-[#D4A017] hover:bg-[#C29112] active:bg-[#B38309] text-[#241C08] font-bold text-[13px] uppercase tracking-wider shadow transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <span>Sign In</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-[#241C08]" />
+                  </button>
 
-              <form onSubmit={handleLoginSubmit} className="space-y-3.5">
-                {/* Email / Phone Field */}
-                <div>
-                  <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider mb-1">
-                    Email Address or Phone Number
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="minister@copconnect.org"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-md bg-slate-50 border border-slate-300 focus:border-[#002D72] focus:bg-white focus:outline-none text-xs font-medium text-slate-900 transition-all"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div>
-                  <label className="block text-[11px] font-bold text-[#0B2545] uppercase tracking-wider mb-1">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-9 pr-10 py-2.5 rounded-md bg-slate-50 border border-slate-300 focus:border-[#002D72] focus:bg-white focus:outline-none text-xs font-medium text-slate-900 transition-all"
-                      required
-                    />
+                  <div className="text-center pt-2">
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                      tabIndex={-1}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onClick={onRequestAccess}
+                      className="text-[11.5px] text-[#C6CEE4] hover:text-[#D4A017] underline transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      New here? Request access
                     </button>
                   </div>
-                </div>
-
-                {/* Action Button */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full mt-2 py-3 rounded-md bg-[#F1B51C] hover:bg-[#E5A812] active:bg-[#D99A08] text-[#091B33] font-bold text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center justify-center gap-2 border border-[#D99A08]"
-                >
-                  <span>Log In</span>
-                  <ArrowRight className="w-4 h-4 text-[#091B33]" />
-                </button>
-              </form>
-
-              {/* Request Access Gateway Link */}
-              <div className="pt-3 border-t border-slate-100 text-center space-y-1.5">
-                <p className="text-xs text-slate-600">
-                  New appointment or transfer?
-                </p>
-                <button
-                  type="button"
-                  onClick={onRequestAccess}
-                  className="w-full py-2.5 rounded-md text-xs font-bold text-[#002D72] bg-[#002D72]/5 hover:bg-[#002D72]/10 border border-[#002D72]/20 transition-colors flex items-center justify-center gap-1.5"
-                >
-                  <UserCheck className="w-3.5 h-3.5 text-[#F1B51C]" />
-                  <span>Request Ministerial Access</span>
-                </button>
-              </div>
+                </form>
+              )}
             </div>
           )}
-        </div>
-      </main>
 
-      {/* Institutional Footer */}
-      <footer className="w-full max-w-md text-center py-2 space-y-1 text-slate-300 text-[11px] z-10">
-        <div className="flex items-center justify-center gap-2 text-[#F1B51C] font-semibold text-[10px] tracking-wider uppercase">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Verified Church Collaboration Network</span>
+          {/* Footer Theme */}
+          <div className="mt-6 pt-3 border-t border-white/10 w-full text-center">
+            <div className="text-[#8695BC] text-[10.5px] tracking-wide">
+              Vision 2028 — Possessing the Nations
+            </div>
+          </div>
         </div>
-        <div className="text-slate-400 text-[10px]">
-          &copy; {new Date().getFullYear()} The Church of Pentecost. General Headquarters, Accra.
-        </div>
-      </footer>
+      </div>
     </div>
   );
 };

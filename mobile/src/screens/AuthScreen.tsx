@@ -14,7 +14,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { Shield, UserCheck, Users, Camera, Lock, Mail, Phone, ArrowLeft, CheckCircle } from 'lucide-react-native';
+import { Shield, UserCheck, Users, Camera, Lock, Mail, Phone, ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react-native';
 
 export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => void }> = ({
   navigation,
@@ -23,12 +23,14 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
   const { loginWithEmail, registerSuperAdmin, registerAreaHead, registerPastor, users } = useAuth();
   const { areas } = useData();
 
-  const [authView, setAuthView] = useState<'login' | 'request_access'>('login');
+  // View state: 'splash' | 'login' | 'request_access'
+  const [authView, setAuthView] = useState<'splash' | 'login' | 'request_access'>('splash');
   const [role, setRole] = useState<'super_admin' | 'area_head' | 'pastor'>('pastor');
 
   // Login inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Registration inputs
@@ -162,40 +164,78 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
       {/* Deep Navy Gradient Overlay */}
       <View style={styles.overlay}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          {/* Official Emblem Centerpiece */}
-          <View style={styles.header}>
-            <View style={styles.emblemCard}>
-              <Image
-                source={require('../../assets/cop_emblem_circle.png')}
-                style={styles.emblemImage}
-                resizeMode="contain"
-              />
+          
+          {/* Card Frame */}
+          <View style={styles.cardFrame}>
+            
+            {/* Centerpiece Halo & Badge */}
+            <View style={styles.haloWrapper}>
+              <View style={styles.haloRing} />
+              <View style={styles.raisedBadge}>
+                <Image
+                  source={require('../../assets/cop_emblem_circle.png')}
+                  style={styles.emblemImage}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
-            <Text style={styles.churchTitle}>THE CHURCH OF PENTECOST</Text>
-            <Text style={styles.appTitle}>COP CONNECT</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>OFFICIAL MINISTERIAL INTRANET</Text>
-            </View>
-          </View>
 
-          {/* Form Card */}
-          <View style={styles.card}>
-            {authView === 'login' ? (
-              // LOGIN VIEW
-              <View style={styles.form}>
-                <Text style={styles.formTitle}>Ministerial Sign In</Text>
-                <Text style={styles.formSubtitle}>
-                  Enter your verified Church of Pentecost ministerial credentials.
-                </Text>
+            {/* Wordmark Titles */}
+            <View style={styles.wordmarkContainer}>
+              <Text style={styles.d1}>THE CHURCH OF PENTECOST</Text>
+              <Text style={styles.d2}>
+                COP <Text style={styles.d2Em}>Connect</Text>
+              </Text>
+            </View>
+
+            {/* Gold Divider */}
+            <View style={styles.divider} />
+
+            <Text style={styles.tagline}>Official ministerial intranet</Text>
+
+            {/* VIEW 1: HERO SPLASH MODE */}
+            {authView === 'splash' && (
+              <View style={styles.splashActions}>
+                <TouchableOpacity
+                  onPress={() => setAuthView('login')}
+                  style={styles.goldCta}
+                >
+                  <Text style={styles.goldCtaText}>Continue to sign in</Text>
+                  <ArrowRight size={16} color="#241C08" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setAuthView('request_access')}
+                  style={styles.secondaryCta}
+                >
+                  <UserCheck size={14} color="#D4A017" />
+                  <Text style={styles.secondaryCtaText}>Request access</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* VIEW 2: SIGN IN FORM MODE */}
+            {authView === 'login' && (
+              <View style={styles.formContainer}>
+                <View style={styles.formHeader}>
+                  <TouchableOpacity
+                    onPress={() => setAuthView('splash')}
+                    style={styles.backBtn}
+                  >
+                    <ArrowLeft size={14} color="#D4A017" />
+                    <Text style={styles.backBtnText}>Overview</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.formModeLabel}>Sign In</Text>
+                </View>
 
                 <Text style={styles.inputLabel}>Official Email or Phone</Text>
                 <View style={styles.inputWrapper}>
-                  <Mail size={16} color="#0B2545" style={styles.inputIcon} />
+                  <Mail size={15} color="#DCE3F2" style={styles.inputIcon} />
                   <TextInput
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="pastor@thecophq.org"
-                    placeholderTextColor="#94A3B8"
+                    placeholder="pastor@copconnect.org"
+                    placeholderTextColor="#726C60"
                     autoCapitalize="none"
                     style={styles.input}
                   />
@@ -203,105 +243,107 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
 
                 <Text style={styles.inputLabel}>Password</Text>
                 <View style={styles.inputWrapper}>
-                  <Lock size={16} color="#0B2545" style={styles.inputIcon} />
+                  <Lock size={15} color="#DCE3F2" style={styles.inputIcon} />
                   <TextInput
                     value={password}
                     onChangeText={setPassword}
                     placeholder="••••••••••••"
-                    placeholderTextColor="#94A3B8"
-                    secureTextEntry
+                    placeholderTextColor="#726C60"
+                    secureTextEntry={!showPassword}
                     style={styles.input}
                   />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeBtn}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={15} color="#DCE3F2" />
+                    ) : (
+                      <Eye size={15} color="#DCE3F2" />
+                    )}
+                  </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity
                   onPress={handleLogin}
                   disabled={isSubmitting}
-                  style={styles.goldBtn}
+                  style={styles.goldCta}
                 >
                   {isSubmitting ? (
-                    <ActivityIndicator color="#091B33" />
+                    <ActivityIndicator color="#241C08" />
                   ) : (
-                    <Text style={styles.goldBtnText}>LOG IN TO INTRANET</Text>
+                    <Text style={styles.goldCtaText}>Sign In</Text>
                   )}
                 </TouchableOpacity>
 
-                <View style={styles.requestAccessRow}>
-                  <Text style={styles.requestAccessPrompt}>New Minister or Apostle? </Text>
-                  <TouchableOpacity onPress={() => setAuthView('request_access')}>
-                    <Text style={styles.requestAccessLink}>Request Access</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              // REQUEST ACCESS VIEW
-              <View style={styles.form}>
                 <TouchableOpacity
-                  onPress={() => setAuthView('login')}
-                  style={styles.backBtn}
+                  onPress={() => setAuthView('request_access')}
+                  style={styles.requestLink}
                 >
-                  <ArrowLeft size={16} color="#0B2545" />
-                  <Text style={styles.backBtnText}>Back to Sign In</Text>
+                  <Text style={styles.requestLinkText}>New here? Request access</Text>
                 </TouchableOpacity>
+              </View>
+            )}
 
-                <Text style={styles.formTitle}>Request Ministerial Access</Text>
-                <Text style={styles.formSubtitle}>
-                  Access is strictly gated. Select your claimed office and submit for verification.
-                </Text>
+            {/* VIEW 3: REQUEST ACCESS VIEW */}
+            {authView === 'request_access' && (
+              <View style={styles.formContainer}>
+                <View style={styles.formHeader}>
+                  <TouchableOpacity
+                    onPress={() => setAuthView('splash')}
+                    style={styles.backBtn}
+                  >
+                    <ArrowLeft size={14} color="#D4A017" />
+                    <Text style={styles.backBtnText}>Back</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.formModeLabel}>Request Access</Text>
+                </View>
 
                 {/* Role Selector */}
-                <Text style={styles.inputLabel}>Ecclesiastical Office</Text>
-                <View style={styles.roleGrid}>
+                <Text style={styles.inputLabel}>Office</Text>
+                <View style={styles.roleRow}>
                   <TouchableOpacity
                     onPress={() => setRole('pastor')}
-                    style={[styles.roleOption, role === 'pastor' && styles.roleOptionActive]}
+                    style={[styles.roleChip, role === 'pastor' && styles.roleChipActive]}
                   >
-                    <Users size={16} color={role === 'pastor' ? '#FFFFFF' : '#0B2545'} />
-                    <Text style={[styles.roleOptionText, role === 'pastor' && styles.roleOptionTextActive]}>
-                      District Pastor
-                    </Text>
+                    <Users size={12} color={role === 'pastor' ? '#241C08' : '#DCE3F2'} />
+                    <Text style={[styles.roleChipText, role === 'pastor' && styles.roleChipTextActive]}>Pastor</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={() => setRole('area_head')}
-                    style={[styles.roleOption, role === 'area_head' && styles.roleOptionActive]}
+                    style={[styles.roleChip, role === 'area_head' && styles.roleChipActive]}
                   >
-                    <UserCheck size={16} color={role === 'area_head' ? '#FFFFFF' : '#0B2545'} />
-                    <Text style={[styles.roleOptionText, role === 'area_head' && styles.roleOptionTextActive]}>
-                      Area Head
-                    </Text>
+                    <UserCheck size={12} color={role === 'area_head' ? '#241C08' : '#DCE3F2'} />
+                    <Text style={[styles.roleChipText, role === 'area_head' && styles.roleChipTextActive]}>Area Head</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={() => setRole('super_admin')}
-                    style={[styles.roleOption, role === 'super_admin' && styles.roleOptionActive]}
+                    style={[styles.roleChip, role === 'super_admin' && styles.roleChipActive]}
                   >
-                    <Shield size={16} color={role === 'super_admin' ? '#FFFFFF' : '#0B2545'} />
-                    <Text style={[styles.roleOptionText, role === 'super_admin' && styles.roleOptionTextActive]}>
-                      Headquarters
-                    </Text>
+                    <Shield size={12} color={role === 'super_admin' ? '#241C08' : '#DCE3F2'} />
+                    <Text style={[styles.roleChipText, role === 'super_admin' && styles.roleChipTextActive]}>HQ</Text>
                   </TouchableOpacity>
                 </View>
 
-                {/* Portrait Photo Upload */}
-                <Text style={styles.inputLabel}>Face ID Portrait Photo</Text>
-                <TouchableOpacity onPress={handlePickImage} style={styles.photoUploadBox}>
+                {/* Portrait Upload */}
+                <Text style={styles.inputLabel}>Face ID Photo</Text>
+                <TouchableOpacity onPress={handlePickImage} style={styles.photoBox}>
                   {profilePhoto ? (
-                    <Image source={{ uri: profilePhoto }} style={styles.photoPreview} />
+                    <Image source={{ uri: profilePhoto }} style={styles.photoImg} />
                   ) : (
-                    <View style={styles.photoUploadPlaceholder}>
-                      <Camera size={24} color="#0B2545" />
-                      <Text style={styles.photoUploadText}>Upload Official Portrait</Text>
+                    <View style={styles.photoPlaceholder}>
+                      <Camera size={18} color="#D4A017" />
+                      <Text style={styles.photoText}>Attach Portrait</Text>
                     </View>
                   )}
                 </TouchableOpacity>
 
-                <Text style={styles.inputLabel}>Full Name & Title *</Text>
+                <Text style={styles.inputLabel}>Full Name *</Text>
                 <TextInput
                   value={fullName}
                   onChangeText={setFullName}
-                  placeholder="e.g. Apostle Dr. Michael Prempeh"
-                  placeholderTextColor="#94A3B8"
+                  placeholder="e.g. Pastor Isaac Mensah"
+                  placeholderTextColor="#726C60"
                   style={styles.singleInput}
                 />
 
@@ -310,28 +352,28 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
                   value={email}
                   onChangeText={setEmail}
                   placeholder="pastor@thecophq.org"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#726C60"
                   autoCapitalize="none"
                   style={styles.singleInput}
                 />
 
-                <Text style={styles.inputLabel}>Phone Number *</Text>
+                <Text style={styles.inputLabel}>Phone *</Text>
                 <TextInput
                   value={phone}
                   onChangeText={setPhone}
                   placeholder="+233 24 000 0000"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#726C60"
                   style={styles.singleInput}
                 />
 
                 {role === 'area_head' && (
                   <>
-                    <Text style={styles.inputLabel}>Area Name You Are Heading *</Text>
+                    <Text style={styles.inputLabel}>Area Name *</Text>
                     <TextInput
                       value={areaName}
                       onChangeText={setAreaName}
                       placeholder="e.g. Cape Coast Area"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor="#726C60"
                       style={styles.singleInput}
                     />
                   </>
@@ -344,7 +386,7 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
                       value={districtName}
                       onChangeText={setDistrictName}
                       placeholder="e.g. Darkuman District"
-                      placeholderTextColor="#94A3B8"
+                      placeholderTextColor="#726C60"
                       style={styles.singleInput}
                     />
                   </>
@@ -355,22 +397,22 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
                   value={regPassword}
                   onChangeText={setRegPassword}
                   placeholder="••••••••••••"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#726C60"
                   secureTextEntry
                   style={styles.singleInput}
                 />
 
-                <TouchableOpacity onPress={handleRequestAccess} style={styles.goldBtn}>
-                  <Text style={styles.goldBtnText}>SUBMIT ACCESS REQUEST</Text>
+                <TouchableOpacity onPress={handleRequestAccess} style={styles.goldCta}>
+                  <Text style={styles.goldCtaText}>Submit Request</Text>
                 </TouchableOpacity>
               </View>
             )}
-          </View>
 
-          {/* Footer Note */}
-          <Text style={styles.footerNote}>
-            Vision 2028: Possessing the Nations &bull; The Church of Pentecost
-          </Text>
+            {/* Footer */}
+            <View style={styles.footerContainer}>
+              <Text style={styles.footText}>Vision 2028 — Possessing the Nations</Text>
+            </View>
+          </View>
         </ScrollView>
       </View>
     </ImageBackground>
@@ -385,232 +427,286 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(9, 27, 51, 0.88)',
+    backgroundColor: 'rgba(9, 15, 32, 0.90)',
   },
   scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 40,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  header: {
+  cardFrame: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: 'rgba(6, 11, 24, 0.82)',
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    paddingHorizontal: 22,
+    paddingVertical: 26,
     alignItems: 'center',
-    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
   },
-  emblemCard: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+  haloWrapper: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  haloRing: {
+    position: 'absolute',
+    width: 136,
+    height: 136,
+    borderRadius: 68,
+    borderWidth: 2.5,
+    borderColor: '#D4A017',
+    borderTopColor: '#C0392B',
+    borderRightColor: '#D4A017',
+    borderBottomColor: 'transparent',
+    borderLeftColor: '#D4A017',
+  },
+  raisedBadge: {
+    width: 108,
+    height: 108,
+    borderRadius: 54,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    marginBottom: 12,
-  },
-  emblemImage: {
-    width: 80,
-    height: 80,
-  },
-  churchTitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-  },
-  appTitle: {
-    color: '#F1B51C',
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 1.5,
-    marginTop: 2,
-  },
-  badge: {
-    marginTop: 6,
-    backgroundColor: 'rgba(241, 181, 28, 0.15)',
-    borderColor: 'rgba(241, 181, 28, 0.4)',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  badgeText: {
-    color: '#F1B51C',
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 22,
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
-    elevation: 10,
+    elevation: 8,
   },
-  form: {
+  emblemImage: {
     width: '100%',
+    height: '100%',
   },
-  formTitle: {
-    fontSize: 17,
+  wordmarkContainer: {
+    alignItems: 'center',
+    marginTop: 18,
+  },
+  d1: {
+    color: '#DCE3F2',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+  },
+  d2: {
+    color: '#FFFFFF',
+    fontSize: 26,
     fontWeight: '800',
-    color: '#091B33',
+    marginTop: 3,
+  },
+  d2Em: {
+    color: '#D4A017',
+    fontStyle: 'italic',
+    fontWeight: '700',
+  },
+  divider: {
+    width: 46,
+    height: 2,
+    backgroundColor: '#D4A017',
+    marginVertical: 12,
+  },
+  tagline: {
+    color: '#C6CEE4',
+    fontSize: 12.5,
+    letterSpacing: 0.3,
     marginBottom: 4,
   },
-  formSubtitle: {
+  splashActions: {
+    width: '100%',
+    marginTop: 22,
+    gap: 10,
+  },
+  goldCta: {
+    backgroundColor: '#D4A017',
+    paddingVertical: 13,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    shadowColor: '#D4A017',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  goldCtaText: {
+    color: '#241C08',
+    fontWeight: '700',
+    fontSize: 13.5,
+  },
+  secondaryCta: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    paddingVertical: 10,
+    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  secondaryCtaText: {
+    color: '#DCE3F2',
+    fontSize: 12.5,
+    fontWeight: '600',
+  },
+  formContainer: {
+    width: '100%',
+    marginTop: 14,
+  },
+  formHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    paddingBottom: 8,
+    marginBottom: 10,
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  backBtnText: {
+    color: '#DCE3F2',
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  formModeLabel: {
+    color: '#D4A017',
     fontSize: 11,
-    color: '#64748B',
-    marginBottom: 16,
-    lineHeight: 16,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   inputLabel: {
+    color: '#DCE3F2',
     fontSize: 10,
-    fontWeight: '800',
-    color: '#091B33',
+    fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: 10,
+    marginTop: 8,
     marginBottom: 4,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderRadius: 4,
+    paddingHorizontal: 10,
   },
   inputIcon: {
-    marginRight: 8,
+    marginRight: 6,
   },
   input: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 13,
-    color: '#091B33',
+    paddingVertical: 8,
+    fontSize: 12,
+    color: '#FFFFFF',
   },
   singleInput: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    fontSize: 13,
-    color: '#091B33',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 12,
+    color: '#FFFFFF',
   },
-  goldBtn: {
-    backgroundColor: '#F1B51C',
-    paddingVertical: 13,
-    borderRadius: 8,
+  eyeBtn: {
+    padding: 4,
+  },
+  requestLink: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    shadowColor: '#F1B51C',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 10,
   },
-  goldBtnText: {
-    color: '#091B33',
-    fontWeight: '900',
-    fontSize: 13,
-    letterSpacing: 0.8,
-  },
-  requestAccessRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  requestAccessPrompt: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  requestAccessLink: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#002D72',
+  requestLinkText: {
+    color: '#C6CEE4',
+    fontSize: 11.5,
     textDecorationLine: 'underline',
   },
-  backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 12,
-  },
-  backBtnText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#002D72',
-  },
-  roleGrid: {
+  roleRow: {
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  roleOption: {
+  roleChip: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    paddingVertical: 9,
-    paddingHorizontal: 4,
-    borderRadius: 8,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    paddingVertical: 7,
+    borderRadius: 4,
   },
-  roleOptionActive: {
-    backgroundColor: '#002D72',
-    borderColor: '#002D72',
+  roleChipActive: {
+    backgroundColor: '#D4A017',
+    borderColor: '#D4A017',
   },
-  roleOptionText: {
+  roleChipText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#091B33',
+    color: '#DCE3F2',
   },
-  roleOptionTextActive: {
-    color: '#FFFFFF',
+  roleChipTextActive: {
+    color: '#241C08',
   },
-  photoUploadBox: {
-    height: 70,
-    borderRadius: 8,
+  photoBox: {
+    height: 56,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     borderStyle: 'dashed',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  photoUploadPlaceholder: {
+  photoPlaceholder: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
-  photoUploadText: {
+  photoText: {
     fontSize: 11,
+    color: '#DCE3F2',
     fontWeight: '600',
-    color: '#091B33',
   },
-  photoPreview: {
+  photoImg: {
     width: '100%',
     height: '100%',
   },
-  footerNote: {
-    color: '#94A3B8',
-    fontSize: 10,
-    textAlign: 'center',
-    marginTop: 20,
+  footerContainer: {
+    marginTop: 18,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    width: '100%',
+    alignItems: 'center',
+  },
+  footText: {
+    color: '#8695BC',
+    fontSize: 10.5,
+    letterSpacing: 0.4,
   },
 });
