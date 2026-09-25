@@ -23,7 +23,7 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
   const { loginWithEmail, registerSuperAdmin, registerAreaHead, registerPastor, users } = useAuth();
   const { areas } = useData();
 
-  // View state: 'splash' | 'login' | 'request_access'
+  // View state: 'splash' (exact reference launch screen) | 'login' | 'request_access'
   const [authView, setAuthView] = useState<'splash' | 'login' | 'request_access'>('splash');
   const [role, setRole] = useState<'super_admin' | 'area_head' | 'pastor'>('pastor');
 
@@ -161,16 +161,19 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
       style={styles.bgImage}
       resizeMode="cover"
     >
-      {/* Deep Navy Gradient Overlay */}
+      {/* Deep Navy Gradient Overlay: Darkest at top & bottom, lighter in mid-section */}
       <View style={styles.overlay}>
+        
+        {/* Scroll View Container */}
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
-          {/* Card Frame */}
-          <View style={styles.cardFrame}>
+          {/* TOP SECTION: Emblem Badge & Branding Wordmark */}
+          <View style={styles.topSection}>
             
-            {/* Centerpiece Halo & Badge */}
-            <View style={styles.haloWrapper}>
-              <View style={styles.haloRing} />
+            {/* Centerpiece Badge with Gold & Red Arcs */}
+            <View style={styles.badgeWrapper}>
+              <View style={styles.goldArc} />
+              <View style={styles.redArc} />
               <View style={styles.raisedBadge}>
                 <Image
                   source={require('../../assets/cop_emblem_circle.png')}
@@ -183,17 +186,22 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
             {/* Wordmark Titles */}
             <View style={styles.wordmarkContainer}>
               <Text style={styles.d1}>THE CHURCH OF PENTECOST</Text>
-              <Text style={styles.d2}>
-                COP <Text style={styles.d2Em}>Connect</Text>
-              </Text>
+              <View style={styles.d2Row}>
+                <Text style={styles.d2}>COP</Text>
+                <Text style={styles.d2Em}>Connect</Text>
+              </View>
             </View>
 
             {/* Gold Divider */}
             <View style={styles.divider} />
 
             <Text style={styles.tagline}>Official ministerial intranet</Text>
+          </View>
 
-            {/* VIEW 1: HERO SPLASH MODE */}
+          {/* BOTTOM SECTION: EXACT MATCH LAUNCH SPLASH CTAS OR FORMS */}
+          <View style={styles.bottomSection}>
+            
+            {/* VIEW 1: EXACT MATCH LAUNCH SCREEN */}
             {authView === 'splash' && (
               <View style={styles.splashActions}>
                 <TouchableOpacity
@@ -201,15 +209,14 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
                   style={styles.goldCta}
                 >
                   <Text style={styles.goldCtaText}>Continue to sign in</Text>
-                  <ArrowRight size={16} color="#241C08" />
+                  <Text style={styles.arrowIcon}>&rarr;</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => setAuthView('request_access')}
-                  style={styles.secondaryCta}
+                  style={styles.requestLink}
                 >
-                  <UserCheck size={14} color="#D4A017" />
-                  <Text style={styles.secondaryCtaText}>Request access</Text>
+                  <Text style={styles.requestLinkText}>New here? Request access</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -223,7 +230,7 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
                     style={styles.backBtn}
                   >
                     <ArrowLeft size={14} color="#D4A017" />
-                    <Text style={styles.backBtnText}>Overview</Text>
+                    <Text style={styles.backBtnText}>Back</Text>
                   </TouchableOpacity>
                   <Text style={styles.formModeLabel}>Sign In</Text>
                 </View>
@@ -408,10 +415,8 @@ export const AuthScreen: React.FC<{ navigation?: any; onLoginSuccess?: () => voi
               </View>
             )}
 
-            {/* Footer */}
-            <View style={styles.footerContainer}>
-              <Text style={styles.footText}>Vision 2028 — Possessing the Nations</Text>
-            </View>
+            {/* Smallest, dimmest line at the very bottom */}
+            <Text style={styles.footText}>Vision 2028 — Possessing the Nations</Text>
           </View>
         </ScrollView>
       </View>
@@ -427,65 +432,66 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(9, 15, 32, 0.90)',
+    backgroundColor: 'rgba(9, 15, 32, 0.88)',
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 45,
+    paddingBottom: 25,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  cardFrame: {
+  topSection: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: 'rgba(6, 11, 24, 0.82)',
-    borderRadius: 32,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    paddingHorizontal: 22,
-    paddingVertical: 26,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
+    marginTop: 10,
   },
-  haloWrapper: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  haloRing: {
-    position: 'absolute',
+  badgeWrapper: {
     width: 136,
     height: 136,
     borderRadius: 68,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    marginBottom: 16,
+  },
+  goldArc: {
+    position: 'absolute',
+    width: 132,
+    height: 132,
+    borderRadius: 66,
     borderWidth: 2.5,
-    borderColor: '#D4A017',
-    borderTopColor: '#C0392B',
-    borderRightColor: '#D4A017',
-    borderBottomColor: 'transparent',
+    borderColor: 'transparent',
+    borderTopColor: '#D4A017',
     borderLeftColor: '#D4A017',
+    borderRightColor: '#D4A017',
+    transform: [{ rotate: '-25deg' }],
+  },
+  redArc: {
+    position: 'absolute',
+    width: 132,
+    height: 132,
+    borderRadius: 66,
+    borderWidth: 2.5,
+    borderColor: 'transparent',
+    borderBottomColor: '#C0392B',
+    transform: [{ rotate: '45deg' }],
   },
   raisedBadge: {
-    width: 108,
-    height: 108,
-    borderRadius: 54,
+    width: 106,
+    height: 106,
+    borderRadius: 53,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
+    padding: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
   },
   emblemImage: {
     width: '100%',
@@ -493,80 +499,94 @@ const styles = StyleSheet.create({
   },
   wordmarkContainer: {
     alignItems: 'center',
-    marginTop: 18,
   },
   d1: {
     color: '#DCE3F2',
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '600',
-    letterSpacing: 0.8,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  d2Row: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 3,
   },
   d2: {
     color: '#FFFFFF',
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
-    marginTop: 3,
   },
   d2Em: {
     color: '#D4A017',
     fontStyle: 'italic',
+    fontSize: 28,
     fontWeight: '700',
+    marginLeft: 6,
   },
   divider: {
     width: 46,
     height: 2,
     backgroundColor: '#D4A017',
-    marginVertical: 12,
+    marginVertical: 10,
   },
   tagline: {
     color: '#C6CEE4',
     fontSize: 12.5,
     letterSpacing: 0.3,
-    marginBottom: 4,
+  },
+  bottomSection: {
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    marginBottom: 5,
   },
   splashActions: {
     width: '100%',
-    marginTop: 22,
-    gap: 10,
+    alignItems: 'center',
   },
   goldCta: {
     backgroundColor: '#D4A017',
-    paddingVertical: 13,
-    borderRadius: 4,
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     shadowColor: '#D4A017',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
     elevation: 4,
   },
   goldCtaText: {
     color: '#241C08',
     fontWeight: '700',
-    fontSize: 13.5,
+    fontSize: 14,
   },
-  secondaryCta: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    paddingVertical: 10,
-    borderRadius: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+  arrowIcon: {
+    color: '#241C08',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  secondaryCtaText: {
-    color: '#DCE3F2',
+  requestLink: {
+    marginTop: 12,
+    paddingVertical: 4,
+  },
+  requestLinkText: {
+    color: '#C6CEE4',
     fontSize: 12.5,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   formContainer: {
     width: '100%',
-    marginTop: 14,
+    backgroundColor: 'rgba(6, 11, 24, 0.90)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 16,
+    marginBottom: 8,
   },
   formHeader: {
     flexDirection: 'row',
@@ -575,7 +595,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     paddingBottom: 8,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   backBtn: {
     flexDirection: 'row',
@@ -599,13 +619,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 3,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.18)',
     borderRadius: 4,
@@ -616,31 +636,22 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 7,
     fontSize: 12,
     color: '#FFFFFF',
   },
   singleInput: {
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.18)',
     borderRadius: 4,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 7,
     fontSize: 12,
     color: '#FFFFFF',
   },
   eyeBtn: {
     padding: 4,
-  },
-  requestLink: {
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  requestLinkText: {
-    color: '#C6CEE4',
-    fontSize: 11.5,
-    textDecorationLine: 'underline',
   },
   roleRow: {
     flexDirection: 'row',
@@ -672,7 +683,7 @@ const styles = StyleSheet.create({
     color: '#241C08',
   },
   photoBox: {
-    height: 56,
+    height: 52,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -696,17 +707,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  footerContainer: {
-    marginTop: 18,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    width: '100%',
-    alignItems: 'center',
-  },
   footText: {
-    color: '#8695BC',
-    fontSize: 10.5,
-    letterSpacing: 0.4,
+    color: 'rgba(134, 149, 188, 0.75)',
+    fontSize: 10,
+    letterSpacing: 0.3,
+    marginTop: 12,
   },
 });
